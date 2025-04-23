@@ -37,9 +37,10 @@ import {
   fantom,
   gnosis,
   celo,
-  base,
-  Chain,
+  base
 } from "wagmi/chains";
+
+import type { Chain } from "wagmi";
 
 type WarpView = "home" | "send" | "request" | "airdrop" | "history";
 
