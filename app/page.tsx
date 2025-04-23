@@ -48,7 +48,7 @@ const chainOptions: { label: string; chain: Chain }[] = [
   { label: "Base", chain: base },
   { label: "Ethereum", chain: mainnet },
   { label: "Arbitrum", chain: arbitrum },
-  { label: "Optimism", chain: optimism },
+  //{ label: "Optimism", chain: optimism },
   { label: "Polygon", chain: polygon },
   { label: "Avalanche", chain: avalanche },
   { label: "Fantom", chain: fantom },
