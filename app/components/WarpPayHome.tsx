@@ -1,14 +1,7 @@
-// src/components/WarpPayHome.tsx
 "use client";
 
 import React from "react";
-import {
-  FiSend,
-  FiDollarSign,
-  FiGift,
-  FiClock,
-  FiBookOpen 
-} from "react-icons/fi";
+import { FiSend, FiDollarSign, FiGift, FiClock, FiBookOpen } from "react-icons/fi";
 
 export type WarpView = "send" | "request" | "airdrop" | "scheduled" | "history";
 
@@ -24,41 +17,11 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
     action: WarpView;
     enabled: boolean;
   }[] = [
-    {
-      icon: <FiSend />,
-      label: "Send",
-      desc: "Instantly send ETH or tokens to any wallet on-chain.",
-      action: "send",
-      enabled: true,
-    },
-    {
-      icon: <FiDollarSign />,
-      label: "Request",
-      desc: "Generate a payment request that others can fulfill easily.",
-      action: "request",
-      enabled: true,
-    },
-    {
-      icon: <FiGift />,
-      label: "Multisend / Airdrop",
-      desc: "Distribute tokens to multiple addresses at once.",
-      action: "airdrop",
-      enabled: false,
-    },
-    {
-      icon: <FiClock />,
-      label: "Scheduled",
-      desc: "Schedule future transactions or token drops.",
-      action: "scheduled",
-      enabled: false,
-    },
-    {
-      icon: <FiBookOpen />,
-      label: "Txs History",
-      desc: "View your past transactions and activity logs.",
-      action: "history",
-      enabled: false,
-    },
+    { icon: <FiSend />, label: "Send", desc: "Instantly send ETH or tokens to any wallet onchain.", action: "send", enabled: true },
+    { icon: <FiDollarSign />, label: "Request", desc: "Generate a payment request link that anyone can fulfill.", action: "request", enabled: true },
+    { icon: <FiGift />, label: "Multisend / Airdrop", desc: "Distribute tokens to multiple addresses at once.", action: "airdrop", enabled: false },
+    { icon: <FiClock />, label: "Scheduled", desc: "Schedule one-time or recurring payments.", action: "scheduled", enabled: false },
+    { icon: <FiBookOpen />, label: "Txs History", desc: "View your past transactions and activity logs.", action: "history", enabled: false },
   ];
 
   return (
@@ -77,11 +40,9 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
         <h3 className="text-xl font-bold text-[#8565CB] ml-2">beta</h3>
         <span className="text-3xl ml-2">💸</span>
       </div>
-      <p className="text-sm text-gray-400 mb-8 text-center">
-        Send, request & drop tokens on Warpcast
-      </p>
+      <p className="text-sm text-gray-400 mb-8 text-center">Send, request & drop tokens on Warpcast</p>
 
-      {/* Buttons with improved layout */}
+      {/* Buttons */}
       <div className="flex flex-col space-y-4 w-full max-w-md">
         {actions.map(({ icon, label, desc, action, enabled }) => (
           <button
@@ -89,19 +50,13 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
             onClick={() => enabled && onAction(action)}
             disabled={!enabled}
             className={`w-full rounded-xl px-5 py-4 text-left shadow-md transition border ${
-              enabled
-                ? "bg-[#1a1725] hover:bg-[#2a2438] border-[#2a2438]"
-                : "bg-[#1a1725] border-[#3a3448] opacity-50 cursor-not-allowed"
+              enabled ? "bg-[#1a1725] hover:bg-[#2a2438] border-[#2a2438]" : "bg-[#1a1725] border-[#3a3448] opacity-50 cursor-not-allowed"
             }`}
           >
             <div className="flex items-center space-x-3 mb-1">
               <div className="text-lg">{icon}</div>
               <span className="font-semibold text-white">{label}</span>
-              {!enabled && (
-                <span className="ml-auto text-xs text-purple-400">
-                  Coming soon
-                </span>
-              )}
+              {!enabled && <span className="ml-auto text-xs text-purple-400">Coming soon</span>}
             </div>
             <div className="text-xs text-gray-400 pl-8">{desc}</div>
           </button>
