@@ -26,7 +26,7 @@ export async function generateMetadata({ searchParams }: { searchParams: { [key:
           ? `https://warppay.lopezonchain.xyz/payment-frame.png`
           : "https://warppay.lopezonchain.xyz/WarpPayLogo.png",
         button: {
-          title: isPayment ? `Send ${formattedAmount} 💸` : "Launch WarpPay 💸",
+          title: isPayment ? `Send me ${formattedAmount} 💸` : "Launch WarpPay 💸",
           action: {
             type: "launch_frame",
             url: isPayment
