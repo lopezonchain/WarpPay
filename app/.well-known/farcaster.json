@@ -1,0 +1,18 @@
+{
+    "accountAssociation": {
+        "header": "eyJmaWQiOjgwMjA5MCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGM2YWU4NGZiYjFCMkQ4NDg4NWRiRmViYUJhN2Q0N2E5OTU0NjA3YjEifQ",
+        "payload": "",
+        "signature": ""
+    },
+    "frame": {
+      "name": "WarpBoard",
+      "version": "1",
+      "iconUrl": "https://warppay.lopezonchain.xyz/WarpPayLogo.png",
+      "homeUrl": "https://warppay.lopezonchain.xyz",
+      "imageUrl": "https://warppay.lopezonchain.xyz/WarpPayLogo.png",
+      "buttonTitle": "Launch WarpPay",
+      "splashImageUrl": "https://warppay.lopezonchain.xyz/WarpPayLogo.png",
+      "splashBackgroundColor": "#17101f",
+      "webhookUrl": "https://warppay.lopezonchain.xyz/api/webhook"
+    }
+  }
