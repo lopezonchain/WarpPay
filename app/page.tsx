@@ -11,19 +11,22 @@ export async function generateMetadata({ searchParams }: { searchParams: { [key:
 
   const isPayment = wallet && amount;
 
+  const formattedAmount = amount ? `${amount} ${token}` : '';
+  const shortWallet = wallet ? `${wallet.slice(0, 6)}...${wallet.slice(-4)}` : '';
+
   return {
-    title: isPayment ? "WarpPay Payment" : "WarpBoard",
+    title: isPayment ? `Send me ${formattedAmount} 💸` : "WarpBoard",
     description: isPayment
-      ? `Pay ${amount} ${token} to ${wallet}`
+      ? `Send ${formattedAmount} to ${shortWallet}`
       : "WarpPay. Easy payments of all kinds, in Warpcast or browser",
     other: {
       'fc:frame': JSON.stringify({
         version: "next",
         imageUrl: isPayment
-          ? "https://warppay.lopezonchain.xyz/payment-frame.png"
+          ? `https://warppay.lopezonchain.xyz/payment-frame.png`
           : "https://warppay.lopezonchain.xyz/WarpPayLogo.png",
         button: {
-          title: isPayment ? "Pay Now 💸" : "Launch WarpPay 💸",
+          title: isPayment ? `Send ${formattedAmount} 💸` : "Launch WarpPay 💸",
           action: {
             type: "launch_frame",
             url: isPayment
