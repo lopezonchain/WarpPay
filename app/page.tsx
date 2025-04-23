@@ -1,3 +1,4 @@
+// src/app/page.tsx
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
@@ -6,7 +7,6 @@ import { useSearchParams } from "next/navigation";
 import {
   useMiniKit,
   useAddFrame,
-  useOpenUrl,
 } from "@coinbase/onchainkit/minikit";
 import {
   Name,
@@ -29,20 +29,12 @@ import AirdropScreen from "./components/AirdropScreen";
 import HistoryScreen from "./components/HistoryScreen";
 
 import {
-  mainnet,
-  arbitrum,
-  optimism,
-  polygon,
-  avalanche,
-  fantom,
-  gnosis,
-  celo,
-  base,
+  mainnet, arbitrum, optimism, polygon, avalanche,
+  fantom, gnosis, celo, base,
 } from "wagmi/chains";
 
 type WarpView = "home" | "send" | "request" | "airdrop" | "history" | "scheduled";
 
-// Inferimos el tipo correcto de cada chain desde chainOptions dinámicamente
 const chainOptions = [
   { label: "Base", chain: base },
   { label: "Ethereum", chain: mainnet },
@@ -55,17 +47,50 @@ const chainOptions = [
   { label: "Celo", chain: celo },
 ] as const;
 
-export default function App(): JSX.Element {
+export async function generateMetadata({ searchParams }: { searchParams: { [key: string]: string } }) {
+  const wallet = searchParams.wallet;
+  const amount = searchParams.amount;
+  const token = searchParams.token || "ETH";
+
+  const isPayment = wallet && amount;
+
+  return {
+    title: isPayment ? "WarpPay Payment" : "WarpBoard",
+    description: isPayment
+      ? `Pay ${amount} ${token} to ${wallet}`
+      : "WarpPay. Easy payments of all kinds, in Warpcast or browser",
+    other: {
+      'fc:frame': JSON.stringify({
+        version: "next",
+        imageUrl: isPayment
+          ? "https://warppay.lopezonchain.xyz/payment-frame.png"
+          : "https://warppay.lopezonchain.xyz/WarpPayLogo.png",
+        button: {
+          title: isPayment ? "Pay Now 💸" : "Launch WarpPay 💸",
+          action: {
+            type: "launch_frame",
+            url: isPayment
+              ? `https://warppay.lopezonchain.xyz?wallet=${wallet}&amount=${amount}&token=${token}`
+              : "https://warppay.lopezonchain.xyz",
+            name: "WarpBoard",
+            splashImageUrl: "https://warppay.lopezonchain.xyz/WarpPayLogo.png",
+            splashBackgroundColor: "#17101f",
+          },
+        },
+      }),
+    },
+  };
+}
+
+export default function Page(): JSX.Element {
   const { address } = useAccount();
   const { data: walletClient } = useWalletClient();
   const searchParams = useSearchParams();
   const { setFrameReady, isFrameReady, context } = useMiniKit();
   const addFrame = useAddFrame();
-  const openUrl = useOpenUrl();
 
   const [warpView, setWarpView] = useState<WarpView>("home");
   const [frameAdded, setFrameAdded] = useState(false);
-
   const [selectedChain, setSelectedChain] = useState<any>(base);
 
   useEffect(() => {
@@ -95,13 +120,7 @@ export default function App(): JSX.Element {
   const saveFrameButton = useMemo(() => {
     if (context && !context.client.added) {
       return (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleAddFrame}
-          className="p-4"
-          icon={<Icon name="plus" size="sm" />}
-        >
+        <Button variant="ghost" size="sm" onClick={handleAddFrame} className="p-4" icon={<Icon name="plus" size="sm" />}>
           Save Frame
         </Button>
       );
@@ -142,7 +161,7 @@ export default function App(): JSX.Element {
   const handleBack = () => setWarpView("home");
 
   return (
-    <div className="flex flex-col bg-[#0f0d14] font-sans text-[var(--app-foreground)] mini-app-theme from-[var(--app-background)] to-[var(--app-gray)]">
+    <div className="flex flex-col bg-[#0f0d14] font-sans text-[var(--app-foreground)] mini-app-theme">
       <div className="w-full max-w-md mx-auto px-4 py-3 min-h-screen">
         <header className="flex justify-between items-center mb-3 h-11">
           <div className="flex items-center space-x-2">
@@ -151,12 +170,7 @@ export default function App(): JSX.Element {
                 <Name className="text-inherit" />
               </ConnectWallet>
               <WalletDropdown>
-                <Identity
-                  address={address}
-                  chain={selectedChain}
-                  className="px-4 pt-3 pb-2"
-                  hasCopyAddressOnClick
-                >
+                <Identity address={address} chain={selectedChain} className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
                   <Avatar address={address} chain={selectedChain} />
                   <Name address={address} chain={selectedChain} />
                   <Address address={address} />
@@ -183,18 +197,10 @@ export default function App(): JSX.Element {
 
         <main className="flex-1">
           {warpView === "home" && <WarpPayHome onAction={(view) => setWarpView(view)} />}
-          {warpView === "send" && (
-            <SendScreen address={address} onBack={handleBack} />
-          )}
-          {warpView === "request" && (
-            <RequestScreen address={address} onBack={handleBack} />
-          )}
-          {warpView === "airdrop" && (
-            <AirdropScreen address={address} onBack={handleBack} />
-          )}
-          {warpView === "history" && (
-            <HistoryScreen address={address} onBack={handleBack} />
-          )}
+          {warpView === "send" && <SendScreen address={address} onBack={handleBack} />}
+          {warpView === "request" && <RequestScreen address={address} onBack={handleBack} />}
+          {warpView === "airdrop" && <AirdropScreen address={address} onBack={handleBack} />}
+          {warpView === "history" && <HistoryScreen address={address} onBack={handleBack} />}
         </main>
       </div>
     </div>
