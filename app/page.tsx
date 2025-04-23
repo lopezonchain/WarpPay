@@ -116,17 +116,26 @@ export default function App(): JSX.Element {
 
   const handleChainChange = async (id: number) => {
     const found = chainOptions.find((o) => o.chain.id === id);
-    if (found) {
-      setSelectedChain(found.chain);
-      if (walletClient) {
-        try {
-          await walletClient.switchChain({ id });
-        } catch (error) {
+    if (found && walletClient) {
+      try {
+        await walletClient.switchChain({ id });
+        setSelectedChain(found.chain);
+      } catch (error: any) {
+        // Error 4902 = chain not added
+        if (error.code === 4902) {
+          try {
+            await walletClient.addChain({ chain: found.chain }); // 🚀 agrega la red
+            await walletClient.switchChain({ id }); // intenta de nuevo
+            setSelectedChain(found.chain);
+          } catch (addError) {
+            console.error("Error adding chain:", addError);
+          }
+        } else {
           console.error("Error switching chain:", error);
         }
       }
     }
-  };
+  };  
 
   const handleBack = () => setWarpView("home");
 
