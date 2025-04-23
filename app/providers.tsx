@@ -37,6 +37,18 @@ const config = createConfig({
   ssr: true,
 });
 
+// 💡 Tipado flexible para las chains
+type ChainType =
+  | typeof base
+  | typeof mainnet
+  | typeof arbitrum
+  | typeof optimism
+  | typeof polygon
+  | typeof avalanche
+  | typeof fantom
+  | typeof gnosis
+  | typeof celo;
+
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
@@ -49,7 +61,7 @@ export function Providers({ children }: { children: ReactNode }) {
 
 function MiniKitWrapper({ children }: { children: ReactNode }) {
   const { data: walletClient } = useWalletClient();
-  const [selectedChain, setSelectedChain] = useState(mainnet);
+  const [selectedChain, setSelectedChain] = useState<ChainType>(mainnet); // ✅ Tipado flexible
 
   const chainOptions = [
     { label: "Base", chain: base },
@@ -72,7 +84,7 @@ function MiniKitWrapper({ children }: { children: ReactNode }) {
 
   return (
     <MiniKitProvider
-      key={selectedChain.id}
+      key={selectedChain.id} // Forzar remount al cambiar de red
       apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
       chain={selectedChain}
       config={{
