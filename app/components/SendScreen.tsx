@@ -5,12 +5,11 @@ import React, { useState, useEffect } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import AlertModal from "./AlertModal";
 import { sendTokens } from "../services/api";
-import type { WalletClient } from "wagmi";
 import { useSearchParams } from "next/navigation";
 import { parseUnits } from "viem";
 
 interface Props {
-  walletClient?: WalletClient;
+  walletClient?: any;
   address?: string;
   onBack: () => void;
 }

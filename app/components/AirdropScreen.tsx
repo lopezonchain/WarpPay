@@ -3,10 +3,9 @@ import React, { useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import AlertModal from "./AlertModal";
 import { createAirdrop } from "../services/api";
-import type { WalletClient } from "wagmi";
 
 interface AirdropScreenProps {
-  walletClient?: WalletClient;
+  walletClient?: any;
   address?: string;
   onBack: () => void;
 }
