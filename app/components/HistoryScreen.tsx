@@ -20,7 +20,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ address, onBack }) => {
   }, [address]);
 
   return (
-    <div className="p-4 text-white min-h-screen bg-[#0f0d14]">
+    <div className="p-4 text-white bg-[#0f0d14]">
       <button
         onClick={onBack}
         className="mb-4 flex items-center text-purple-400"

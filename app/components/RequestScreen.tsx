@@ -50,7 +50,7 @@ const RequestScreen: React.FC<Props> = ({ address, onBack }) => {
   };
 
   return (
-    <div className="p-4 text-white min-h-screen bg-[#0f0d14]">
+    <div className="p-4 text-white bg-[#0f0d14]">
       <button onClick={onBack} className="mb-4 flex items-center text-purple-400">
         <FiArrowLeft className="w-5 h-5 mr-1" /> Back
       </button>

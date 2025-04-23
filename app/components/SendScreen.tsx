@@ -94,6 +94,7 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
         const parsed = parseUnits(amount, decimals);
   
         setModalMessage("Approving token...");
+        /*
         // approval a SPENDER_ADDRESS
         const approveHash = await walletClient.writeContract({
           address: contractAddress as `0x${string}`,
@@ -103,13 +104,13 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
         });
         // esperamos la aprobación
         await publicClient.waitForTransactionReceipt({ hash: approveHash });
-  
+  */
         setModalMessage("Sending tokens...");
         // transfer ERC20
         const tx = await sendTokens(
           walletClient,
           address,
-          to,
+          to as `0x${string}`,
           parsed,
           contractAddress as `0x${string}`
         );
@@ -124,7 +125,7 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
   
 
   return (
-    <div className="p-4 text-white min-h-screen bg-[#0f0d14]">
+    <div className="p-4 text-white bg-[#0f0d14]">
       <button
         onClick={onBack}
         className="mb-4 flex items-center text-purple-400"

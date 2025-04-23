@@ -17,7 +17,7 @@ interface WarpPayHomeProps {
 
 const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
   return (
-    <div className="min-h-screen bg-[#0f0d14] text-white px-4 py-6 flex flex-col items-center">
+    <div className="bg-[#0f0d14] text-white px-4 py-6 flex flex-col items-center">
       <div className="flex items-end">
         <h1 className="text-4xl font-bold mb-2">WarpPay</h1>
         <h3 className="text-xl font-bold text-[#8565CB]">beta</h3>
