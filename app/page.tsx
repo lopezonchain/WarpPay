@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useAccount, useWalletClient, useConnect } from "wagmi";
-import { injected } from "wagmi/connectors";
+import { useSearchParams } from "next/navigation";
 import {
   useMiniKit,
   useAddFrame,
@@ -38,6 +38,8 @@ export default function App(): JSX.Element {
   const { data: walletClient } = useWalletClient();
   const { connect } = useConnect();
 
+  const searchParams = useSearchParams();
+
   // Coinbase MiniKit context
   const { setFrameReady, isFrameReady, context } = useMiniKit();
   const addFrame = useAddFrame();
@@ -49,42 +51,28 @@ export default function App(): JSX.Element {
 
   // Auto-connect injected wallet on mount
   useEffect(() => {
-    if (!isConnected && !triedAutoConnect) {
-      connect({ connector: injected() });
-      setTriedAutoConnect(true);
-    }
-  }, [isConnected, triedAutoConnect, connect]);
+    const to = searchParams.get("wallet");
+    const amount = searchParams.get("amount");
+    if (to && amount) setWarpView("send");
+  }, [searchParams]);
 
-  useEffect(() => {
-    if (!isFrameReady) {
-      setFrameReady();
-    }
-  }, [setFrameReady, isFrameReady]);
-
+  useEffect(() => { if (!isFrameReady) setFrameReady(); }, [isFrameReady, setFrameReady]);
   const handleAddFrame = useCallback(async () => {
     const added = await addFrame();
     setFrameAdded(Boolean(added));
   }, [addFrame]);
-
   const saveFrameButton = useMemo(() => {
     if (context && !context.client.added) {
       return (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleAddFrame}
-          className="text-[var(--app-accent)] p-4"
-          icon={<Icon name="plus" size="sm" />}
-        >
-          Save Frame
+        <Button /* ... */ onClick={handleAddFrame}>
+          <Icon name="plus" /> Save Frame
         </Button>
       );
     }
     if (frameAdded) {
       return (
-        <div className="flex items-center space-x-1 text-sm font-medium text-[#0052FF] animate-fade-out">
-          <Icon name="check" size="sm" className="text-[#0052FF]" />
-          <span>Saved</span>
+        <div className="animate-fade-out">
+          <Icon name="check" /> Saved
         </div>
       );
     }
@@ -118,38 +106,12 @@ export default function App(): JSX.Element {
         </header>
 
         <main className="flex-1">
-          {warpView === "home" && (
-            <WarpPayHome
-              onAction={setWarpView}
-              isConnected={isConnected}
-              address={address}
-            />
-          )}
-          {warpView === "send" && (
-            <SendScreen
-              walletClient={walletClient}
-              address={address}
-              onBack={handleBack}
-            />
-          )}
-          {warpView === "request" && (
-            <RequestScreen
-              walletClient={walletClient}
-              address={address}
-              onBack={handleBack}
-            />
-          )}
-          {warpView === "airdrop" && (
-            <AirdropScreen
-              walletClient={walletClient}
-              address={address}
-              onBack={handleBack}
-            />
-          )}
-          {warpView === "history" && (
-            <HistoryScreen address={address} onBack={handleBack} />
-          )}
-        </main>
+        {warpView === "home" && <WarpPayHome onAction={setWarpView} />}
+        {warpView === "send" && <SendScreen walletClient={walletClient} address={address} onBack={handleBack} />}
+        {warpView === "request" && <RequestScreen walletClient={walletClient} address={address} onBack={handleBack} />}
+        {warpView === "airdrop" && <AirdropScreen walletClient={walletClient} address={address} onBack={handleBack} />}
+        {warpView === "history" && <HistoryScreen address={address} onBack={handleBack} />}
+      </main>
 
         <footer className="mt-2 pt-4 flex justify-center">
           <Button

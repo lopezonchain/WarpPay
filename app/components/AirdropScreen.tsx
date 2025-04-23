@@ -1,24 +1,53 @@
-import { useState } from "react";
+// src/components/AirdropScreen.tsx
+import React, { useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
+import AlertModal from "./AlertModal";
+import { createAirdrop } from "../services/api";
+import type { WalletClient } from "wagmi";
 
-export default function AirdropScreen({ walletClient, address, onBack }) {
+interface AirdropScreenProps {
+  walletClient?: WalletClient;
+  address?: string;
+  onBack: () => void;
+}
+
+const AirdropScreen: React.FC<AirdropScreenProps> = ({
+  walletClient,
+  address,
+  onBack,
+}) => {
   const [token, setToken] = useState("ETH");
   const [total, setTotal] = useState("");
   const [quantity, setQuantity] = useState("");
+  const [modalMessage, setModalMessage] = useState<string | null>(null);
 
-  const handleAirdrop = () => {
-    // TODO: integrate Merkle airdrop or backend logic
-    alert(`Airdropping ${total} ${token} to ${quantity} recipients`);
+  const handleAirdrop = async () => {
+    if (!walletClient || !address) return;
+    setModalMessage("Creando airdrop...");
+    try {
+      const tx = await createAirdrop(
+        walletClient,
+        address,
+        token,
+        total,
+        parseInt(quantity, 10)
+      );
+      setModalMessage(`Airdrop iniciado: ${tx.summary}`);
+    } catch (err) {
+      setModalMessage(`Error: ${(err as Error).message}`);
+    }
   };
 
   return (
     <div className="p-4 text-white min-h-screen bg-[#0f0d14]">
-      <button onClick={onBack} className="mb-4 flex items-center text-purple-400">
-      <FiArrowLeft className="w-5 h-5 mr-1" /> Back
+      <button
+        onClick={onBack}
+        className="mb-4 flex items-center text-purple-400"
+      >
+        <FiArrowLeft className="w-5 h-5 mr-1" /> Back
       </button>
 
       <h2 className="text-2xl font-bold mb-4">Create Airdrop</h2>
-
       <div className="space-y-4">
         <input
           type="text"
@@ -48,6 +77,15 @@ export default function AirdropScreen({ walletClient, address, onBack }) {
           Create Airdrop
         </button>
       </div>
+
+      {modalMessage && (
+        <AlertModal
+          message={modalMessage}
+          onClose={() => setModalMessage(null)}
+        />
+      )}
     </div>
   );
-}
+};
+
+export default AirdropScreen;

@@ -3,13 +3,7 @@ import React from 'react';
 import { FiSend, FiDollarSign, FiGift, FiClock, FiLogOut, FiLogIn } from 'react-icons/fi';
 
 export default function WarpPayHome({
-  onAction,
-  isConnected,
-  address,
-  isMiniApp,
-  connect,
-  connectors,
-  disconnect
+  onAction
 }) {
   return (
     <div className="min-h-screen bg-[#0f0d14] text-white px-4 py-6 flex flex-col items-center">
