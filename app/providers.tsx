@@ -1,7 +1,7 @@
 // src/components/Providers.tsx
 "use client";
 
-import React, { useState, createContext, useContext, ReactNode } from 'react';
+import React, { useState, createContext, useContext, ReactNode, Suspense } from 'react';
 import { MiniKitProvider } from '@coinbase/onchainkit/minikit';
 import {
   mainnet,
@@ -65,7 +65,7 @@ export function Providers({ children }: { children: ReactNode }) {
             },
           }}
         >
-          {children}
+          <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
         </MiniKitProvider>
       </ChainContext.Provider>
 
