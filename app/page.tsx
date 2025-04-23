@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { useAccount, useWalletClient, useConnect } from "wagmi";
+import { useAccount, useWalletClient } from "wagmi";
 import { useSearchParams } from "next/navigation";
 import {
   useMiniKit,
