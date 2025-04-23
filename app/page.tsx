@@ -43,7 +43,7 @@ import {
 
 type WarpView = "home" | "send" | "request" | "airdrop" | "history";
 
-const chainOptions = [
+const chainOptions: { label: string; chain: Chain }[] = [
   { label: "Base", chain: base },
   { label: "Ethereum", chain: mainnet },
   { label: "Arbitrum", chain: arbitrum },
