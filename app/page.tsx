@@ -34,9 +34,9 @@ type WarpView = "home" | "send" | "request" | "airdrop" | "history";
 
 export default function App(): JSX.Element {
   // Wagmi hooks
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
   const { data: walletClient } = useWalletClient();
-  const { connect } = useConnect();
+  //const { connect } = useConnect();
 
   const searchParams = useSearchParams();
 
@@ -47,7 +47,7 @@ export default function App(): JSX.Element {
 
   const [frameAdded, setFrameAdded] = useState(false);
   const [warpView, setWarpView] = useState<WarpView>("home");
-  const [triedAutoConnect, setTriedAutoConnect] = useState(false);
+  //const [triedAutoConnect, setTriedAutoConnect] = useState(false);
 
   // Auto-connect injected wallet on mount
   useEffect(() => {
