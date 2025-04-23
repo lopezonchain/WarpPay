@@ -65,7 +65,7 @@ export default function App(): JSX.Element {
 
   const [warpView, setWarpView] = useState<WarpView>("home");
   const [frameAdded, setFrameAdded] = useState(false);
-  const [selectedChain, setSelectedChain] = useState<Chain>(base); // default a Base
+  const [selectedChain, setSelectedChain] = useState<any>(base);
 
   useEffect(() => {
     if (walletClient) {
