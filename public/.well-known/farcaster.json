@@ -2,10 +2,10 @@
     "accountAssociation": {
         "header": "eyJmaWQiOjgwMjA5MCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGM2YWU4NGZiYjFCMkQ4NDg4NWRiRmViYUJhN2Q0N2E5OTU0NjA3YjEifQ",
         "payload": "eyJkb21haW4iOiJ3YXJwcGF5LmxvcGV6b25jaGFpbi54eXoifQ",
-    "signature": "MHgzMjVmYjJhZDBhNjdlNmMyNjcxZDRiMmYwN2RiYTk1ZjRhNjFjMTVjZDM1OTYwOGNhM2ZjY2IxYzhmNjVmOWUwNjcwYzhkYzk0NWRhZjI5YjcyYWVhNzg1N2E5Zjk1ZWI2MzNkYmNlMTkzMWE4MWFkNjgwOGQ2NTMxMjEyY2JlMzFi"
+        "signature": "MHgzMjVmYjJhZDBhNjdlNmMyNjcxZDRiMmYwN2RiYTk1ZjRhNjFjMTVjZDM1OTYwOGNhM2ZjY2IxYzhmNjVmOWUwNjcwYzhkYzk0NWRhZjI5YjcyYWVhNzg1N2E5Zjk1ZWI2MzNkYmNlMTkzMWE4MWFkNjgwOGQ2NTMxMjEyY2JlMzFi"
     },
     "frame": {
-      "name": "WarpBoard",
+      "name": "WarpPay",
       "version": "next",
       "iconUrl": "https://warppay.lopezonchain.xyz/WarpPayLogo.png",
       "homeUrl": "https://warppay.lopezonchain.xyz",
