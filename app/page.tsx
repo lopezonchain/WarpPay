@@ -1,173 +1,44 @@
-// src/app/page.tsx
-"use client";
+import dynamic from 'next/dynamic';
+import type { Metadata } from 'next';
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { useAccount, useWalletClient } from "wagmi";
-import { useSearchParams } from "next/navigation";
-import {
-  useMiniKit,
-  useAddFrame,
-} from "@coinbase/onchainkit/minikit";
-import {
-  Name,
-  Identity,
-  Address,
-  Avatar,
-  EthBalance,
-} from "@coinbase/onchainkit/identity";
-import {
-  ConnectWallet,
-  Wallet,
-  WalletDropdown,
-  WalletDropdownDisconnect,
-} from "@coinbase/onchainkit/wallet";
-import { Button, Icon } from "./components/DemoComponents";
-import WarpPayHome from "./components/WarpPayHome";
-import SendScreen from "./components/SendScreen";
-import RequestScreen from "./components/RequestScreen";
-import AirdropScreen from "./components/AirdropScreen";
-import HistoryScreen from "./components/HistoryScreen";
+// Dinámicamente importa el componente cliente
+const WarpPayApp = dynamic(() => import('./page-client'), { ssr: false });
 
-import {
-  mainnet, arbitrum, optimism, polygon, avalanche,
-  fantom, gnosis, celo, base,
-} from "wagmi/chains";
+export async function generateMetadata({ searchParams }: { searchParams: { [key: string]: string } }): Promise<Metadata> {
+  const wallet = searchParams.wallet;
+  const amount = searchParams.amount;
+  const token = searchParams.token || "ETH";
 
-type WarpView = "home" | "send" | "request" | "airdrop" | "history" | "scheduled";
+  const isPayment = wallet && amount;
 
-const chainOptions = [
-  { label: "Base", chain: base },
-  { label: "Ethereum", chain: mainnet },
-  { label: "Arbitrum", chain: arbitrum },
-  { label: "Optimism", chain: optimism },
-  { label: "Polygon", chain: polygon },
-  { label: "Avalanche", chain: avalanche },
-  { label: "Fantom", chain: fantom },
-  { label: "Gnosis", chain: gnosis },
-  { label: "Celo", chain: celo },
-] as const;
-
-export default function Page(): JSX.Element {
-  const { address } = useAccount();
-  const { data: walletClient } = useWalletClient();
-  const searchParams = useSearchParams();
-  const { setFrameReady, isFrameReady, context } = useMiniKit();
-  const addFrame = useAddFrame();
-
-  const [warpView, setWarpView] = useState<WarpView>("home");
-  const [frameAdded, setFrameAdded] = useState(false);
-  const [selectedChain, setSelectedChain] = useState<any>(base);
-
-  useEffect(() => {
-    if (walletClient) {
-      const found = chainOptions.find((o) => o.chain.id === walletClient.chain.id);
-      if (found && selectedChain.id !== found.chain.id) {
-        setSelectedChain(found.chain);
-      }
-    }
-  }, [walletClient, selectedChain.id]);
-
-  useEffect(() => {
-    const w = searchParams.get("wallet");
-    const a = searchParams.get("amount");
-    if (w && a) setWarpView("send");
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (!isFrameReady) setFrameReady();
-  }, [isFrameReady, setFrameReady]);
-
-  const handleAddFrame = useCallback(async () => {
-    const added = await addFrame();
-    setFrameAdded(Boolean(added));
-  }, [addFrame]);
-
-  const saveFrameButton = useMemo(() => {
-    if (context && !context.client.added) {
-      return (
-        <Button variant="ghost" size="sm" onClick={handleAddFrame} className="p-4" icon={<Icon name="plus" size="sm" />}>
-          Save Frame
-        </Button>
-      );
-    }
-    if (frameAdded) {
-      return (
-        <div className="flex items-center space-x-1 text-sm font-medium text-[#0052FF] animate-fade-out">
-          <Icon name="check" size="sm" className="text-[#0052FF]" />
-          <span>Saved</span>
-        </div>
-      );
-    }
-    return null;
-  }, [context, frameAdded, handleAddFrame]);
-
-  const handleChainChange = async (id: number) => {
-    const found = chainOptions.find((o) => o.chain.id === id);
-    if (found && walletClient) {
-      try {
-        await walletClient.switchChain({ id });
-        setSelectedChain(found.chain);
-      } catch (error: any) {
-        if (error.code === 4902) {
-          try {
-            await walletClient.addChain({ chain: found.chain });
-            await walletClient.switchChain({ id });
-            setSelectedChain(found.chain);
-          } catch (addError) {
-            console.error("Error adding chain:", addError);
-          }
-        } else {
-          console.error("Error switching chain:", error);
-        }
-      }
-    }
+  return {
+    title: isPayment ? "WarpPay Payment" : "WarpBoard",
+    description: isPayment
+      ? `Pay ${amount} ${token} to ${wallet}`
+      : "WarpPay. Easy payments of all kinds, in Warpcast or browser",
+    other: {
+      'fc:frame': JSON.stringify({
+        version: "next",
+        imageUrl: isPayment
+          ? "https://warppay.lopezonchain.xyz/payment-frame.png"
+          : "https://warppay.lopezonchain.xyz/WarpPayLogo.png",
+        button: {
+          title: isPayment ? "Pay Now 💸" : "Launch WarpPay 💸",
+          action: {
+            type: "launch_frame",
+            url: isPayment
+              ? `https://warppay.lopezonchain.xyz?wallet=${wallet}&amount=${amount}&token=${token}`
+              : "https://warppay.lopezonchain.xyz",
+            name: "WarpBoard",
+            splashImageUrl: "https://warppay.lopezonchain.xyz/WarpPayLogo.png",
+            splashBackgroundColor: "#17101f",
+          },
+        },
+      }),
+    },
   };
+}
 
-  const handleBack = () => setWarpView("home");
-
-  return (
-    <div className="flex flex-col bg-[#0f0d14] font-sans text-[var(--app-foreground)] mini-app-theme">
-      <div className="w-full max-w-md mx-auto px-4 py-3 min-h-screen">
-        <header className="flex justify-between items-center mb-3 h-11">
-          <div className="flex items-center space-x-2">
-            <Wallet className="z-10">
-              <ConnectWallet>
-                <Name className="text-inherit" />
-              </ConnectWallet>
-              <WalletDropdown>
-                <Identity address={address} chain={selectedChain} className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-                  <Avatar address={address} chain={selectedChain} />
-                  <Name address={address} chain={selectedChain} />
-                  <Address address={address} />
-                  <EthBalance address={address} />
-                </Identity>
-                <WalletDropdownDisconnect />
-              </WalletDropdown>
-            </Wallet>
-
-            <select
-              value={selectedChain.id}
-              onChange={(e) => handleChainChange(parseInt(e.target.value, 10))}
-              className="bg-[#1a1725] text-sm text-white p-2 rounded"
-            >
-              {chainOptions.map((o) => (
-                <option key={o.chain.id} value={o.chain.id}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>{saveFrameButton}</div>
-        </header>
-
-        <main className="flex-1">
-          {warpView === "home" && <WarpPayHome onAction={(view) => setWarpView(view)} />}
-          {warpView === "send" && <SendScreen address={address} onBack={handleBack} />}
-          {warpView === "request" && <RequestScreen address={address} onBack={handleBack} />}
-          {warpView === "airdrop" && <AirdropScreen address={address} onBack={handleBack} />}
-          {warpView === "history" && <HistoryScreen address={address} onBack={handleBack} />}
-        </main>
-      </div>
-    </div>
-  );
+export default function Page() {
+  return <WarpPayApp />;
 }
