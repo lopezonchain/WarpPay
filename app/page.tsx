@@ -40,7 +40,7 @@ import {
   base
 } from "wagmi/chains";
 
-import type { Chain } from "wagmi";
+import type { Chain } from "wagmi/chains";
 
 type WarpView = "home" | "send" | "request" | "airdrop" | "history";
 
