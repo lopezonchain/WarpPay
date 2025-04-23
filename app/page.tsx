@@ -40,7 +40,7 @@ import {
   base,
 } from "wagmi/chains";
 
-type WarpView = "home" | "send" | "request" | "airdrop" | "history";
+type WarpView = "home" | "send" | "request" | "airdrop" | "history" | "scheduled";
 
 // Inferimos el tipo correcto de cada chain desde chainOptions dinámicamente
 const chainOptions = [
@@ -182,7 +182,7 @@ export default function App(): JSX.Element {
         </header>
 
         <main className="flex-1">
-          {warpView === "home" && <WarpPayHome onAction={setWarpView} />}
+          {warpView === "home" && <WarpPayHome onAction={(view) => setWarpView(view)} />}
           {warpView === "send" && (
             <SendScreen address={address} onBack={handleBack} />
           )}
