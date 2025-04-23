@@ -55,7 +55,16 @@ const chainOptions = [
   { label: "Celo", chain: celo },
 ] as const;
 
-type ChainOptionType = typeof chainOptions[number]["chain"]; // 🔥 Tipo inferido correctamente
+type ChainType =
+| typeof base
+| typeof mainnet
+| typeof arbitrum
+| typeof optimism
+| typeof polygon
+| typeof avalanche
+| typeof fantom
+| typeof gnosis
+| typeof celo;
 
 export default function App(): JSX.Element {
   const { address } = useAccount();
@@ -67,7 +76,8 @@ export default function App(): JSX.Element {
 
   const [warpView, setWarpView] = useState<WarpView>("home");
   const [frameAdded, setFrameAdded] = useState(false);
-  const [selectedChain, setSelectedChain] = useState<ChainOptionType>(base); // ✅ Ahora tipado correctamente
+
+  const [selectedChain, setSelectedChain] = useState<ChainType>(base);
 
   useEffect(() => {
     if (walletClient) {
