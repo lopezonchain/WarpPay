@@ -96,7 +96,7 @@ export default function App(): JSX.Element {
           variant="ghost"
           size="sm"
           onClick={handleAddFrame}
-          className="text-[var(--app-accent)] p-4"
+          className="p-4"
           icon={<Icon name="plus" size="sm" />}
         >
           Save Frame
