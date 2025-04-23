@@ -5,23 +5,42 @@ import React, { useState, useEffect } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import AlertModal from "./AlertModal";
 import { sendTokens } from "../services/api";
+import { useWalletClient, usePublicClient, useAccount } from "wagmi";
 import { useSearchParams } from "next/navigation";
-import { parseUnits } from "viem";
+import { parseUnits, parseEther } from "viem";
 
-interface Props {
-  walletClient?: any;
-  address?: string;
+interface SendScreenProps {
+  address?: `0x${string}`;
   onBack: () => void;
 }
 
+// Reemplaza tu ERC20_ABI de strings por ABI JSON:
 const ERC20_ABI = [
-  "function decimals() view returns (uint8)",
-  "function approve(address spender, uint256 amount) returns (bool)",
+  {
+    type: "function",
+    name: "decimals",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
+  },
+  {
+    type: "function",
+    name: "approve",
+    stateMutability: "nonpayable",
+    inputs: [
+      { internalType: "address", name: "spender", type: "address" },
+      { internalType: "uint256", name: "amount", type: "uint256" },
+    ],
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
+  },
 ];
-// define en .env NEXT_PUBLIC_TOKEN_SPENDER_ADDRESS
-const SPENDER_ADDRESS = process.env.NEXT_PUBLIC_TOKEN_SPENDER_ADDRESS!;
 
-const SendScreen: React.FC<Props> = ({ walletClient, address, onBack }) => {
+const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
+  // walletClient para enviar/transaccionar, publicClient para lecturas on-chain
+  const { data: walletClient } = useWalletClient();
+  const publicClient = usePublicClient();
+  const connectedWallet = useAccount();
+
   const searchParams = useSearchParams();
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
@@ -29,6 +48,7 @@ const SendScreen: React.FC<Props> = ({ walletClient, address, onBack }) => {
   const [contractAddress, setContractAddress] = useState("");
   const [modalMessage, setModalMessage] = useState<string | null>(null);
 
+  // Pre-llenar desde la URL si vienen params
   useEffect(() => {
     const w = searchParams.get("wallet");
     const a = searchParams.get("amount");
@@ -43,53 +63,72 @@ const SendScreen: React.FC<Props> = ({ walletClient, address, onBack }) => {
   }, [searchParams]);
 
   const handleSend = async () => {
-    if (!walletClient || !address || !to || !amount) {
-      setModalMessage("Connect a wallet and fill the inputs");
+    if (!walletClient || !publicClient || !address || !to || !amount) {
+      setModalMessage("Connect wallet and fill all fields");
       return;
     }
+  
     try {
       if (tokenType === "ETH") {
         setModalMessage("Sending ETH...");
-        const tx = await sendTokens(walletClient, address, to, amount);
+        // parseamos a bigint de wei
+        const value = parseEther(amount);
+        // enviamos ETH on‐chain
+        const tx = await sendTokens(walletClient, address, to, value);
+        // esperamos confirmación
+        await publicClient.waitForTransactionReceipt({ hash: tx.hash });
         setModalMessage(`Sent: ${tx.summary}`);
       } else {
         if (!contractAddress) {
-          setModalMessage("Missing token address");
+          setModalMessage("Missing token contract address");
           return;
         }
-        const decimals = (await walletClient.readContract({
+        setModalMessage("Reading token decimals...");
+        // leemos los decimales con publicClient
+        const decimals = (await publicClient.readContract({
           address: contractAddress as `0x${string}`,
           abi: ERC20_ABI,
           functionName: "decimals",
-          args: [],
         })) as number;
-
-        const unitAmount = parseUnits(amount, decimals);
+  
+        const parsed = parseUnits(amount, decimals);
+  
+        setModalMessage("Approving token...");
+        // approval a SPENDER_ADDRESS
         const approveHash = await walletClient.writeContract({
           address: contractAddress as `0x${string}`,
           abi: ERC20_ABI,
           functionName: "approve",
-          args: [SPENDER_ADDRESS, unitAmount],
+          args: [connectedWallet.address as `0x${string}`, parsed],
         });
-        await walletClient.waitForTransactionReceipt({ hash: approveHash });
-
+        // esperamos la aprobación
+        await publicClient.waitForTransactionReceipt({ hash: approveHash });
+  
+        setModalMessage("Sending tokens...");
+        // transfer ERC20
         const tx = await sendTokens(
           walletClient,
           address,
           to,
-          amount,
-          contractAddress
+          parsed,
+          contractAddress as `0x${string}`
         );
+        // esperamos la transferencia
+        await publicClient.waitForTransactionReceipt({ hash: tx.hash as `0x${string}` });
         setModalMessage(`Sent: ${tx.summary}`);
       }
     } catch (err) {
       setModalMessage(`Error: ${(err as Error).message}`);
     }
   };
+  
 
   return (
     <div className="p-4 text-white min-h-screen bg-[#0f0d14]">
-      <button onClick={onBack} className="mb-4 flex items-center text-purple-400">
+      <button
+        onClick={onBack}
+        className="mb-4 flex items-center text-purple-400"
+      >
         <FiArrowLeft className="w-5 h-5 mr-1" /> Back
       </button>
       <h2 className="text-2xl font-bold mb-4">Send Tokens</h2>
@@ -147,7 +186,10 @@ const SendScreen: React.FC<Props> = ({ walletClient, address, onBack }) => {
       </div>
 
       {modalMessage && (
-        <AlertModal message={modalMessage} onClose={() => setModalMessage(null)} />
+        <AlertModal
+          message={modalMessage}
+          onClose={() => setModalMessage(null)}
+        />
       )}
     </div>
   );

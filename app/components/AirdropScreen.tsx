@@ -3,18 +3,18 @@ import React, { useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import AlertModal from "./AlertModal";
 import { createAirdrop } from "../services/api";
+import { useWalletClient } from "wagmi";
 
 interface AirdropScreenProps {
-  walletClient?: any;
   address?: string;
   onBack: () => void;
 }
 
 const AirdropScreen: React.FC<AirdropScreenProps> = ({
-  walletClient,
   address,
   onBack,
 }) => {
+  const { data: walletClient } = useWalletClient();
   const [token, setToken] = useState("ETH");
   const [total, setTotal] = useState("");
   const [quantity, setQuantity] = useState("");

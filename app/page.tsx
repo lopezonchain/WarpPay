@@ -108,7 +108,7 @@ export default function App(): JSX.Element {
         <main className="flex-1">
         {warpView === "home" && <WarpPayHome onAction={setWarpView} />}
         {warpView === "send" && <SendScreen walletClient={walletClient} address={address} onBack={handleBack} />}
-        {warpView === "request" && <RequestScreen walletClient={walletClient} address={address} onBack={handleBack} />}
+        {warpView === "request" && <RequestScreen address={address} onBack={handleBack} />}
         {warpView === "airdrop" && <AirdropScreen walletClient={walletClient} address={address} onBack={handleBack} />}
         {warpView === "history" && <HistoryScreen address={address} onBack={handleBack} />}
       </main>
