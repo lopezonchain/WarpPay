@@ -28,18 +28,31 @@ import RequestScreen from "./components/RequestScreen";
 import AirdropScreen from "./components/AirdropScreen";
 import HistoryScreen from "./components/HistoryScreen";
 
+import {
+  mainnet,
+  arbitrum,
+  optimism,
+  polygon,
+  avalanche,
+  fantom,
+  gnosis,
+  celo,
+  base,
+  Chain,
+} from "wagmi/chains";
+
 type WarpView = "home" | "send" | "request" | "airdrop" | "history";
 
 const chainOptions = [
-  { label: "Base", id: 8453 },
-  { label: "Ethereum", id: 1 },
-  { label: "Arbitrum", id: 42161 },
-  { label: "Optimism", id: 10 },
-  { label: "Polygon", id: 137 },
-  { label: "Avalanche", id: 43114 },
-  { label: "Fantom", id: 250 },
-  { label: "Gnosis", id: 100 },
-  { label: "Celo", id: 42220 },
+  { label: "Base", chain: base },
+  { label: "Ethereum", chain: mainnet },
+  { label: "Arbitrum", chain: arbitrum },
+  { label: "Optimism", chain: optimism },
+  { label: "Polygon", chain: polygon },
+  { label: "Avalanche", chain: avalanche },
+  { label: "Fantom", chain: fantom },
+  { label: "Gnosis", chain: gnosis },
+  { label: "Celo", chain: celo },
 ];
 
 export default function App(): JSX.Element {
@@ -52,11 +65,12 @@ export default function App(): JSX.Element {
 
   const [warpView, setWarpView] = useState<WarpView>("home");
   const [frameAdded, setFrameAdded] = useState(false);
-  const [selectedChainId, setSelectedChainId] = useState<number>(8453);
+  const [selectedChain, setSelectedChain] = useState<Chain>(base); // default a Base
 
   useEffect(() => {
     if (walletClient) {
-      setSelectedChainId(walletClient.chain.id);
+      const found = chainOptions.find((o) => o.chain.id === walletClient.chain.id);
+      if (found) setSelectedChain(found.chain);
     }
   }, [walletClient]);
 
@@ -101,12 +115,15 @@ export default function App(): JSX.Element {
   }, [context, frameAdded, handleAddFrame]);
 
   const handleChainChange = async (id: number) => {
-    setSelectedChainId(id);
-    if (walletClient) {
-      try {
-        await walletClient.switchChain({ id });
-      } catch (error) {
-        console.error("Error switching chain:", error);
+    const found = chainOptions.find((o) => o.chain.id === id);
+    if (found) {
+      setSelectedChain(found.chain);
+      if (walletClient) {
+        try {
+          await walletClient.switchChain({ id });
+        } catch (error) {
+          console.error("Error switching chain:", error);
+        }
       }
     }
   };
@@ -125,12 +142,12 @@ export default function App(): JSX.Element {
               <WalletDropdown>
                 <Identity
                   address={address}
-                  chain={{ id: selectedChainId }}
+                  chain={selectedChain}
                   className="px-4 pt-3 pb-2"
                   hasCopyAddressOnClick
                 >
-                  <Avatar address={address} chain={{ id: selectedChainId }} />
-                  <Name address={address} chain={{ id: selectedChainId }} />
+                  <Avatar address={address} chain={selectedChain} />
+                  <Name address={address} chain={selectedChain} />
                   <Address address={address} />
                   <EthBalance address={address} />
                 </Identity>
@@ -139,12 +156,12 @@ export default function App(): JSX.Element {
             </Wallet>
 
             <select
-              value={selectedChainId ?? ""}
+              value={selectedChain.id}
               onChange={(e) => handleChainChange(parseInt(e.target.value, 10))}
               className="bg-[#1a1725] text-sm text-white p-2 rounded"
             >
               {chainOptions.map((o) => (
-                <option key={o.id} value={o.id}>
+                <option key={o.chain.id} value={o.chain.id}>
                   {o.label}
                 </option>
               ))}
