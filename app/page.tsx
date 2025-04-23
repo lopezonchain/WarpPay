@@ -55,17 +55,6 @@ const chainOptions = [
   { label: "Celo", chain: celo },
 ] as const;
 
-type ChainType =
-| typeof base
-| typeof mainnet
-| typeof arbitrum
-| typeof optimism
-| typeof polygon
-| typeof avalanche
-| typeof fantom
-| typeof gnosis
-| typeof celo;
-
 export default function App(): JSX.Element {
   const { address } = useAccount();
   const { data: walletClient } = useWalletClient();
@@ -77,7 +66,7 @@ export default function App(): JSX.Element {
   const [warpView, setWarpView] = useState<WarpView>("home");
   const [frameAdded, setFrameAdded] = useState(false);
 
-  const [selectedChain, setSelectedChain] = useState<ChainType>(base);
+  const [selectedChain, setSelectedChain] = useState<any>(base);
 
   useEffect(() => {
     if (walletClient) {
