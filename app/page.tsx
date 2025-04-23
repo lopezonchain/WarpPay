@@ -37,24 +37,25 @@ import {
   fantom,
   gnosis,
   celo,
-  base
+  base,
 } from "wagmi/chains";
-
-import type { Chain } from "wagmi/chains";
 
 type WarpView = "home" | "send" | "request" | "airdrop" | "history";
 
-const chainOptions: { label: string; chain: Chain }[] = [
+// Inferimos el tipo correcto de cada chain desde chainOptions dinámicamente
+const chainOptions = [
   { label: "Base", chain: base },
   { label: "Ethereum", chain: mainnet },
   { label: "Arbitrum", chain: arbitrum },
-  //{ label: "Optimism", chain: optimism },
+  { label: "Optimism", chain: optimism },
   { label: "Polygon", chain: polygon },
   { label: "Avalanche", chain: avalanche },
   { label: "Fantom", chain: fantom },
   { label: "Gnosis", chain: gnosis },
   { label: "Celo", chain: celo },
-];
+] as const;
+
+type ChainOptionType = typeof chainOptions[number]["chain"]; // 🔥 Tipo inferido correctamente
 
 export default function App(): JSX.Element {
   const { address } = useAccount();
@@ -66,14 +67,16 @@ export default function App(): JSX.Element {
 
   const [warpView, setWarpView] = useState<WarpView>("home");
   const [frameAdded, setFrameAdded] = useState(false);
-  const [selectedChain, setSelectedChain] = useState<Chain>(base);
+  const [selectedChain, setSelectedChain] = useState<ChainOptionType>(base); // ✅ Ahora tipado correctamente
 
   useEffect(() => {
     if (walletClient) {
       const found = chainOptions.find((o) => o.chain.id === walletClient.chain.id);
-      if (found) setSelectedChain(found.chain);
+      if (found && selectedChain.id !== found.chain.id) {
+        setSelectedChain(found.chain);
+      }
     }
-  }, [walletClient]);
+  }, [walletClient, selectedChain.id]);
 
   useEffect(() => {
     const w = searchParams.get("wallet");
@@ -122,11 +125,10 @@ export default function App(): JSX.Element {
         await walletClient.switchChain({ id });
         setSelectedChain(found.chain);
       } catch (error: any) {
-        // Error 4902 = chain not added
         if (error.code === 4902) {
           try {
-            await walletClient.addChain({ chain: found.chain }); // 🚀 agrega la red
-            await walletClient.switchChain({ id }); // intenta de nuevo
+            await walletClient.addChain({ chain: found.chain });
+            await walletClient.switchChain({ id });
             setSelectedChain(found.chain);
           } catch (addError) {
             console.error("Error adding chain:", addError);
@@ -136,7 +138,7 @@ export default function App(): JSX.Element {
         }
       }
     }
-  };  
+  };
 
   const handleBack = () => setWarpView("home");
 
