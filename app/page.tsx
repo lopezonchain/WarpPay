@@ -52,7 +52,7 @@ export default function App(): JSX.Element {
 
   const [warpView, setWarpView] = useState<WarpView>("home");
   const [frameAdded, setFrameAdded] = useState(false);
-  const [selectedChainId, setSelectedChainId] = useState<number | null>(null);
+  const [selectedChainId, setSelectedChainId] = useState<number>(8453);
 
   useEffect(() => {
     if (walletClient) {
