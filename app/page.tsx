@@ -15,7 +15,7 @@ export async function generateMetadata({ searchParams }: { searchParams: { [key:
   const shortWallet = wallet ? `${wallet.slice(0, 6)}...${wallet.slice(-4)}` : '';
 
   return {
-    title: isPayment ? `WarpPay me ${formattedAmount} 💸` : "WarpBoard",
+    title: isPayment ? `WarpPay me ${formattedAmount} 💸` : "WarpPay",
     description: isPayment
       ? `Send ${formattedAmount} to ${shortWallet}`
       : "WarpPay. Easy payments of all kinds, in Warpcast or browser",
@@ -32,7 +32,7 @@ export async function generateMetadata({ searchParams }: { searchParams: { [key:
             url: isPayment
               ? `https://warppay.lopezonchain.xyz?wallet=${wallet}&amount=${amount}&token=${token}`
               : "https://warppay.lopezonchain.xyz",
-            name: "WarpBoard",
+            name: "WarpPay",
             splashImageUrl: "https://warppay.lopezonchain.xyz/WarpPayLogo.png",
             splashBackgroundColor: "#17101f",
           },
