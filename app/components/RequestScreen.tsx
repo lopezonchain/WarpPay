@@ -18,8 +18,12 @@ const RequestScreen: React.FC<Props> = ({ address, onBack }) => {
   const [modalMessage, setModalMessage] = useState<string | null>(null);
 
   const generateLink = () => {
-    if (!address || !amount) {
-      setModalMessage("Faltan datos requeridos");
+    if (!address) {
+      setModalMessage("Connect a wallet");
+      return;
+    }
+    if (!amount) {
+      setModalMessage("Missing amount");
       return;
     }
     const params = new URLSearchParams();
@@ -27,7 +31,7 @@ const RequestScreen: React.FC<Props> = ({ address, onBack }) => {
     params.set("amount", amount);
     if (tokenType === "ERC20") {
       if (!contractAddress) {
-        setModalMessage("Falta dirección de contrato");
+        setModalMessage("Missing token address");
         return;
       }
       params.set("token", "ERC20");
@@ -41,7 +45,7 @@ const RequestScreen: React.FC<Props> = ({ address, onBack }) => {
   const copyLink = async () => {
     if (link) {
       await navigator.clipboard.writeText(link);
-      setModalMessage("Link copiado al portapapeles");
+      setModalMessage("Link copied!");
     }
   };
 

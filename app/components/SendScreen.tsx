@@ -45,20 +45,19 @@ const SendScreen: React.FC<Props> = ({ walletClient, address, onBack }) => {
 
   const handleSend = async () => {
     if (!walletClient || !address || !to || !amount) {
-      setModalMessage("Faltan datos requeridos");
+      setModalMessage("Connect a wallet and fill the inputs");
       return;
     }
     try {
       if (tokenType === "ETH") {
-        setModalMessage("Enviando ETH...");
+        setModalMessage("Sending ETH...");
         const tx = await sendTokens(walletClient, address, to, amount);
-        setModalMessage(`Enviado: ${tx.summary}`);
+        setModalMessage(`Sent: ${tx.summary}`);
       } else {
         if (!contractAddress) {
-          setModalMessage("Falta dirección de contrato");
+          setModalMessage("Missing token address");
           return;
         }
-        setModalMessage("Lectura de decimales...");
         const decimals = (await walletClient.readContract({
           address: contractAddress as `0x${string}`,
           abi: ERC20_ABI,
@@ -67,7 +66,6 @@ const SendScreen: React.FC<Props> = ({ walletClient, address, onBack }) => {
         })) as number;
 
         const unitAmount = parseUnits(amount, decimals);
-        setModalMessage("Aprobando token...");
         const approveHash = await walletClient.writeContract({
           address: contractAddress as `0x${string}`,
           abi: ERC20_ABI,
@@ -76,7 +74,6 @@ const SendScreen: React.FC<Props> = ({ walletClient, address, onBack }) => {
         });
         await walletClient.waitForTransactionReceipt({ hash: approveHash });
 
-        setModalMessage("Creando transacción de token...");
         const tx = await sendTokens(
           walletClient,
           address,
@@ -84,7 +81,7 @@ const SendScreen: React.FC<Props> = ({ walletClient, address, onBack }) => {
           amount,
           contractAddress
         );
-        setModalMessage(`Enviado: ${tx.summary}`);
+        setModalMessage(`Sent: ${tx.summary}`);
       }
     } catch (err) {
       setModalMessage(`Error: ${(err as Error).message}`);
