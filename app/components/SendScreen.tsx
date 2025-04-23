@@ -74,9 +74,9 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
         // parseamos a bigint de wei
         const value = parseEther(amount);
         // enviamos ETH on‐chain
-        const tx = await sendTokens(walletClient, address, to, value);
+        const tx = await sendTokens(walletClient, address, to as `0x${string}`, value);
         // esperamos confirmación
-        await publicClient.waitForTransactionReceipt({ hash: tx.hash });
+        await publicClient.waitForTransactionReceipt({ hash: tx.hash as `0x${string}` });
         setModalMessage(`Sent: ${tx.summary}`);
       } else {
         if (!contractAddress) {
