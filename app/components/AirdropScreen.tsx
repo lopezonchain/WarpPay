@@ -23,18 +23,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({
   const handleAirdrop = async () => {
     if (!walletClient || !address) return;
     setModalMessage("Creando airdrop...");
-    try {
-      const tx = await createAirdrop(
-        walletClient,
-        address,
-        token,
-        total,
-        parseInt(quantity, 10)
-      );
-      setModalMessage(`Airdrop iniciado: ${tx.summary}`);
-    } catch (err) {
-      setModalMessage(`Error: ${(err as Error).message}`);
-    }
+
   };
 
   return (
