@@ -30,7 +30,7 @@ import AirdropScreen from "./components/AirdropScreen";
 import HistoryScreen from "./components/HistoryScreen";
 
 // Hook de contexto de cadena
-import { useChain } from "./Providers";
+import { useChain } from "./providers";
 
 type WarpView = "home" | "send" | "request" | "airdrop" | "history";
 
@@ -104,11 +104,11 @@ export default function App(): JSX.Element {
                 <Name className="text-inherit" />
               </ConnectWallet>
               <WalletDropdown>
-                <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-                  <Avatar />
-                  <Name />
-                  <Address />
-                  <EthBalance />
+                <Identity address={address} chain={chain} className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+                  <Avatar address={address} chain={chain} />
+                  <Name address={address} chain={chain} />
+                  <Address address={address} />
+                  <EthBalance address={address} />
                 </Identity>
                 <WalletDropdownDisconnect />
               </WalletDropdown>
