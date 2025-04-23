@@ -1,8 +1,7 @@
-// src/components/Providers.tsx
 "use client";
 
-import React, { useState, createContext, useContext, ReactNode, Suspense } from 'react';
-import { MiniKitProvider } from '@coinbase/onchainkit/minikit';
+import React, { ReactNode, Suspense, useEffect, useState } from "react";
+import { WagmiProvider, createConfig, http } from "wagmi";
 import {
   mainnet,
   arbitrum,
@@ -13,61 +12,79 @@ import {
   gnosis,
   celo,
   base,
-} from 'wagmi/chains';
+} from "wagmi/chains";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MiniKitProvider } from "@coinbase/onchainkit/minikit";
+import { useWalletClient } from "wagmi";
 
-interface ChainOption {
-  label: string;
-  chain: any;
-}
+// 1️⃣ Crear QueryClient para React Query
+const queryClient = new QueryClient();
 
-interface ChainContextType {
-  chain: any;
-  setChain: (c: any) => void;
-  options: ChainOption[];
-}
-
-// Context para exponer chain y setChain
-const ChainContext = createContext<ChainContextType | undefined>(undefined);
-export function useChain() {
-  const ctx = useContext(ChainContext);
-  if (!ctx) throw new Error('useChain must be used within Providers');
-  return ctx;
-}
+// 2️⃣ Crear wagmi config
+const config = createConfig({
+  chains: [mainnet, arbitrum, optimism, polygon, avalanche, fantom, gnosis, celo, base],
+  transports: {
+    [mainnet.id]: http(),
+    [arbitrum.id]: http(),
+    [optimism.id]: http(),
+    [polygon.id]: http(),
+    [avalanche.id]: http(),
+    [fantom.id]: http(),
+    [gnosis.id]: http(),
+    [celo.id]: http(),
+    [base.id]: http(),
+  },
+  ssr: true,
+});
 
 export function Providers({ children }: { children: ReactNode }) {
-  // Lista de mainnets disponibles
-  const options: ChainOption[] = [
-    { label: 'Base', chain: base },
-    { label: 'Ethereum', chain: mainnet },
-    { label: 'Arbitrum', chain: arbitrum },
-    { label: 'Optimism', chain: optimism },
-    { label: 'Polygon', chain: polygon },
-    { label: 'Avalanche', chain: avalanche },
-    { label: 'Fantom', chain: fantom },
-    { label: 'Gnosis', chain: gnosis },
-    { label: 'Celo', chain: celo }
+  return (
+    <QueryClientProvider client={queryClient}>
+      <WagmiProvider config={config}>
+        <MiniKitWrapper>{children}</MiniKitWrapper>
+      </WagmiProvider>
+    </QueryClientProvider>
+  );
+}
+
+function MiniKitWrapper({ children }: { children: ReactNode }) {
+  const { data: walletClient } = useWalletClient();
+  const [selectedChain, setSelectedChain] = useState(mainnet);
+
+  const chainOptions = [
+    { label: "Base", chain: base },
+    { label: "Ethereum", chain: mainnet },
+    { label: "Arbitrum", chain: arbitrum },
+    { label: "Optimism", chain: optimism },
+    { label: "Polygon", chain: polygon },
+    { label: "Avalanche", chain: avalanche },
+    { label: "Fantom", chain: fantom },
+    { label: "Gnosis", chain: gnosis },
+    { label: "Celo", chain: celo },
   ];
 
-  // Estado de la red activa
-  const [chain, setChain] = useState<any>(options[0].chain);
+  useEffect(() => {
+    if (walletClient) {
+      const found = chainOptions.find((o) => o.chain.id === walletClient.chain.id);
+      if (found) setSelectedChain(found.chain);
+    }
+  }, [walletClient]);
 
   return (
-      <ChainContext.Provider value={{ chain, setChain, options }}>
-        <MiniKitProvider
-          apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
-          chain={chain}
-          config={{
-            appearance: {
-              mode: 'auto',
-              theme: 'mini-app-theme',
-              name: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME,
-              logo: process.env.NEXT_PUBLIC_ICON_URL,
-            },
-          }}
-        >
-          <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
-        </MiniKitProvider>
-      </ChainContext.Provider>
-
+    <MiniKitProvider
+      key={selectedChain.id}
+      apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
+      chain={selectedChain}
+      config={{
+        appearance: {
+          mode: "auto",
+          theme: "mini-app-theme",
+          name: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME,
+          logo: process.env.NEXT_PUBLIC_ICON_URL,
+        },
+      }}
+    >
+      <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+    </MiniKitProvider>
   );
 }
