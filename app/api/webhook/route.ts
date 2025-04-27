@@ -89,7 +89,7 @@ export async function POST(request: Request) {
         await sendFrameNotification({
           fid,
           title: `Welcome to ${appName}`,
-          body: `Thank you for adding ${appName}`,
+          body: `All kinds of onchain payments made easy, on Warpcast. You can start making your own 100% FREE payment links!`,
         });
       } else {
         await deleteUserNotificationDetails(fid);
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
       await setUserNotificationDetails(fid, event.notificationDetails);
       await sendFrameNotification({
         fid,
-        title: `Welcome to ${appName}`,
+        title: `Notifications enabled!`,
         body: `Thank you for enabling notifications for ${appName}`,
       });
 
