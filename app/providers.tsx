@@ -61,7 +61,7 @@ export function Providers({ children }: { children: ReactNode }) {
 
 function MiniKitWrapper({ children }: { children: ReactNode }) {
   const { data: walletClient } = useWalletClient();
-  const [selectedChain, setSelectedChain] = useState<ChainType>(mainnet); // ✅ Tipado flexible
+  const [selectedChain, setSelectedChain] = useState<ChainType>(mainnet);
 
   const chainOptions = [
     { label: "Base", chain: base },

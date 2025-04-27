@@ -1,7 +1,6 @@
 import dynamic from 'next/dynamic';
 import type { Metadata } from 'next';
 
-// Dinámicamente importa el componente cliente
 const WarpPayApp = dynamic(() => import('./page-client'), { ssr: false });
 
 export async function generateMetadata({ searchParams }: { searchParams: { [key: string]: string } }): Promise<Metadata> {
