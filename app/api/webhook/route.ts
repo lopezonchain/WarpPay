@@ -89,7 +89,7 @@ export async function POST(request: Request) {
         await sendFrameNotification({
           fid,
           title: `Welcome to ${appName}`,
-          body: `All kinds of onchain payments made easy, on Warpcast. You can start making your own 100% FREE payment links!`,
+          body: `Make onchain payments simple and seamless with this Warpcast/Coinbase Miniapp, or directly from the browser. Start creating your own 100% FREE payment links today!`,
         });
       } else {
         await deleteUserNotificationDetails(fid);
