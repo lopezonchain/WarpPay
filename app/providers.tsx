@@ -85,7 +85,7 @@ function MiniKitWrapper({ children }: { children: ReactNode }) {
   return (
     <MiniKitProvider
       key={selectedChain.id} // Forzar remount al cambiar de red
-      apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
+      apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API}
       chain={selectedChain}
       config={{
         appearance: {
