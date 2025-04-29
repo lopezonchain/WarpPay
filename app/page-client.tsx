@@ -32,7 +32,7 @@ import {
   fantom, gnosis, celo, base,
 } from "wagmi/chains";
 
-type WarpView = "home" | "send" | "request" | "airdrop" | "history" | "scheduled";
+export type WarpView = "home" | "send" | "request" | "airdrop" | "history" | "scheduled";
 
 const chainOptions = [
   { label: "Base", chain: base },
