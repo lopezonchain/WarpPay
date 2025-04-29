@@ -1,7 +1,7 @@
 // src/app/page.tsx
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback, ReactNode } from "react";
+import React, { useState, useEffect, useMemo, useCallback, ReactNode, useRef } from "react";
 import { useAccount, useWalletClient, useConnect } from "wagmi";
 import { useSearchParams } from "next/navigation";
 import {
