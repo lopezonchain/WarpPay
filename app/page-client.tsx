@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback, ReactNode } from "react";
-import { useAccount, useWalletClient } from "wagmi";
+import { useAccount, useWalletClient, useConnect } from "wagmi";
 import { useSearchParams } from "next/navigation";
 import {
   useMiniKit,
@@ -202,6 +202,7 @@ export function Icon({ name, size = "md", className = "" }: IconProps) {
 
 export default function Page(): JSX.Element {
   const { address } = useAccount();
+  const { connectAsync, connectors } = useConnect();
   const { data: walletClient } = useWalletClient();
   const searchParams = useSearchParams();
   const { setFrameReady, isFrameReady, context } = useMiniKit();
@@ -210,6 +211,13 @@ export default function Page(): JSX.Element {
   const [warpView, setWarpView] = useState<WarpView>("home");
   const [frameAdded, setFrameAdded] = useState(false);
   const [selectedChain, setSelectedChain] = useState<any>(base);
+
+  useEffect(() => {
+    if (!address && connectors.length) {
+      const injected = connectors.find((c) => c.id === "injected") ?? connectors[0];
+      connectAsync({ connector: injected });
+    }
+  }, [address, connectors, connectAsync]);
 
   useEffect(() => {
     if (walletClient) {
