@@ -90,7 +90,7 @@ export async function createAirdrop(
       args: [tokenAddress, recipients, values],
     });
   } else {
-    const total = values.reduce((acc, v) => acc + v, 0n);
+    const total = values.reduce((acc, v) => Number(acc) + Number(v), 0);
     txHash = await walletClient.writeContract({
       address: WARPPAY_CONTRACT,
       abi: contractAbi,
