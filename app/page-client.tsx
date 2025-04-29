@@ -211,9 +211,15 @@ export default function Page(): JSX.Element {
   const [warpView, setWarpView] = useState<WarpView>("home");
   const [frameAdded, setFrameAdded] = useState(false);
   const [selectedChain, setSelectedChain] = useState<any>(base);
+  const triedAutoConnect = useRef(false);
 
   useEffect(() => {
-    if (!address && connectors.length) {
+    if (!isFrameReady) setFrameReady();
+  }, [isFrameReady, setFrameReady]);
+
+  useEffect(() => {
+    if (!triedAutoConnect.current && !address && connectors.length) {
+      triedAutoConnect.current = true;
       const injected = connectors.find((c) => c.id === "injected") ?? connectors[0];
       connectAsync({ connector: injected });
     }
@@ -233,10 +239,6 @@ export default function Page(): JSX.Element {
     const a = searchParams.get("amount");
     if (w && a) setWarpView("send");
   }, [searchParams]);
-
-  useEffect(() => {
-    if (!isFrameReady) setFrameReady();
-  }, [isFrameReady, setFrameReady]);
 
   const handleAddFrame = useCallback(async () => {
     const added = await addFrame();
