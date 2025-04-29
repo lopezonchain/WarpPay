@@ -4,17 +4,18 @@
 import React, { useState, useEffect } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import AlertModal from "./AlertModal";
-import { sendTokens } from "../services/api";
+import { sendTokens } from "../services/contractService";
 import { useWalletClient, usePublicClient, useAccount } from "wagmi";
 import { useSearchParams } from "next/navigation";
 import { parseUnits, parseEther } from "viem";
+import TokenSelector, { TokenOption } from "./TokenSelector";
 
 interface SendScreenProps {
   address?: `0x${string}`;
   onBack: () => void;
 }
 
-// Reemplaza tu ERC20_ABI de strings por ABI JSON:
+// Minimal ERC20 ABI for decimals
 const ERC20_ABI = [
   {
     type: "function",
@@ -23,20 +24,9 @@ const ERC20_ABI = [
     inputs: [],
     outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
   },
-  {
-    type: "function",
-    name: "approve",
-    stateMutability: "nonpayable",
-    inputs: [
-      { internalType: "address", name: "spender", type: "address" },
-      { internalType: "uint256", name: "amount", type: "uint256" },
-    ],
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
-  },
 ];
 
 const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
-  // walletClient para enviar/transaccionar, publicClient para lecturas on-chain
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const connectedWallet = useAccount();
@@ -44,11 +34,11 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
   const searchParams = useSearchParams();
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
-  const [tokenType, setTokenType] = useState<"ETH" | "ERC20">("ETH");
+  const [selectedToken, setSelectedToken] = useState<TokenOption>("ETH");
   const [contractAddress, setContractAddress] = useState("");
   const [modalMessage, setModalMessage] = useState<string | null>(null);
 
-  // Pre-llenar desde la URL si vienen params
+  // Pre-fill from URL
   useEffect(() => {
     const w = searchParams.get("wallet");
     const a = searchParams.get("amount");
@@ -56,65 +46,57 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
     const c = searchParams.get("contract");
     if (w) setTo(w);
     if (a) setAmount(a);
-    if (t && t !== "ETH") {
-      setTokenType("ERC20");
+    if (t === "USDC") {
+      // Selecting USDC triggers TokenSelector effect to set the proper address
+      setSelectedToken("USDC");
+    } else if (t && t !== "ETH") {
+      setSelectedToken("CUSTOM");
       if (c) setContractAddress(c);
     }
   }, [searchParams]);
+
+
+  const getTokenType = () => (selectedToken === "ETH" ? "ETH" : "ERC20");
 
   const handleSend = async () => {
     if (!walletClient || !publicClient || !address || !to || !amount) {
       setModalMessage("Connect wallet and fill all fields");
       return;
     }
-  
+
+    const tokenType = getTokenType();
+
     try {
       if (tokenType === "ETH") {
         setModalMessage("Sending ETH...");
-        // parseamos a bigint de wei
         const value = parseEther(amount);
-        // enviamos ETH on‐chain
         const tx = await sendTokens(walletClient, address, to as `0x${string}`, value);
-        // esperamos confirmación
         await publicClient.waitForTransactionReceipt({ hash: tx.hash as `0x${string}` });
         setModalMessage(`Sent: ${tx.summary}`);
       } else {
-        if (!contractAddress) {
+        // ERC20 flow
+        let addr = contractAddress;
+        if (!addr) {
           setModalMessage("Missing token contract address");
           return;
         }
         setModalMessage("Reading token decimals...");
-        // leemos los decimales con publicClient
         const decimals = (await publicClient.readContract({
-          address: contractAddress as `0x${string}`,
+          address: addr as `0x${string}`,
           abi: ERC20_ABI,
           functionName: "decimals",
         })) as number;
-  
+
         const parsed = parseUnits(amount, decimals);
-  
-        setModalMessage("Approving token...");
-        /*
-        // approval a SPENDER_ADDRESS
-        const approveHash = await walletClient.writeContract({
-          address: contractAddress as `0x${string}`,
-          abi: ERC20_ABI,
-          functionName: "approve",
-          args: [connectedWallet.address as `0x${string}`, parsed],
-        });
-        // esperamos la aprobación
-        await publicClient.waitForTransactionReceipt({ hash: approveHash });
-  */
+
         setModalMessage("Sending tokens...");
-        // transfer ERC20
         const tx = await sendTokens(
           walletClient,
           address,
           to as `0x${string}`,
           parsed,
-          contractAddress as `0x${string}`
+          addr as `0x${string}`
         );
-        // esperamos la transferencia
         await publicClient.waitForTransactionReceipt({ hash: tx.hash as `0x${string}` });
         setModalMessage(`Sent: ${tx.summary}`);
       }
@@ -122,65 +104,46 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
       setModalMessage(`Error: ${(err as Error).message}`);
     }
   };
-  
 
   return (
-    <div className="p-4 text-white bg-[#0f0d14]">
+    <div className="p-4 text-white bg-[#0f0d14] min-h-screen flex flex-col items-end ">
       <button
         onClick={onBack}
-        className="mb-4 flex items-center text-purple-400"
+        className="mb-4 flex items-center justify-end text-purple-400 text-lg px-4 py-2 bg-[#1a1725] rounded-lg max-w-[200px]"
       >
-        <FiArrowLeft className="w-5 h-5 mr-1" /> Back
+        <FiArrowLeft className="w-6 h-6 mr-2" /> Back
       </button>
-      <h2 className="text-2xl font-bold mb-4">Send Tokens</h2>
-      <div className="space-y-4">
+
+      <h2 className="text-2xl font-bold mb-6 mx-auto">Send</h2>
+
+      <div className="space-y-4 flex-1 w-full">
         <input
           type="text"
           placeholder="Recipient Address"
-          className="w-full p-3 rounded-lg bg-[#1a1725] text-white"
+          className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-base"
           value={to}
           onChange={(e) => setTo(e.target.value)}
         />
+
         <input
           type="number"
           placeholder="Amount"
-          className="w-full p-3 rounded-lg bg-[#1a1725] text-white"
+          className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-base"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
         />
 
-        <div className="flex space-x-4">
-          <label className="flex items-center">
-            <input
-              type="radio"
-              checked={tokenType === "ETH"}
-              onChange={() => setTokenType("ETH")}
-            />
-            <span className="ml-1">ETH</span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              checked={tokenType === "ERC20"}
-              onChange={() => setTokenType("ERC20")}
-            />
-            <span className="ml-1">ERC20</span>
-          </label>
-        </div>
-
-        {tokenType === "ERC20" && (
-          <input
-            type="text"
-            placeholder="Token Contract Address"
-            className="w-full p-3 rounded-lg bg-[#1a1725] text-white"
-            value={contractAddress}
-            onChange={(e) => setContractAddress(e.target.value)}
-          />
-        )}
+        <TokenSelector
+          selected={selectedToken}
+          onSelect={setSelectedToken}
+          customAddress={contractAddress}
+          onCustomAddressChange={setContractAddress}
+          chainId={walletClient?.chain.id ?? 1}
+        />
 
         <button
           onClick={handleSend}
-          className="w-full py-3 rounded-xl font-bold bg-purple-600 hover:bg-purple-700"
+          className="w-full py-4 rounded-2xl font-bold bg-purple-600 hover:bg-purple-700 text-lg"
         >
           Send
         </button>

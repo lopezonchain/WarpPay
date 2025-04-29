@@ -1,7 +1,7 @@
 // src/components/HistoryScreen.tsx
 import React, { useEffect, useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
-import { fetchHistory, Tx } from "../services/api";
+import { fetchHistory, Tx } from "../services/contractService";
 
 interface HistoryScreenProps {
   address?: string;

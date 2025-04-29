@@ -1,25 +1,48 @@
 // src/components/RequestScreen.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import AlertModal from "./AlertModal";
+import TokenSelector, { TokenOption } from "./TokenSelector";
+import { useSearchParams } from "next/navigation";
+import { useWalletClient } from "wagmi";
 
-interface Props {
-  address?: string;
+interface RequestScreenProps {
+  address?: `0x${string}`;
   onBack: () => void;
 }
 
-const RequestScreen: React.FC<Props> = ({ address, onBack }) => {
+const RequestScreen: React.FC<RequestScreenProps> = ({ address, onBack }) => {
+  const searchParams = useSearchParams();
   const [amount, setAmount] = useState("");
-  const [tokenType, setTokenType] = useState<"ETH" | "ERC20">("ETH");
+  const [selectedToken, setSelectedToken] = useState<TokenOption>("ETH");
   const [contractAddress, setContractAddress] = useState("");
   const [link, setLink] = useState("");
   const [modalMessage, setModalMessage] = useState<string | null>(null);
+  const { data: walletClient } = useWalletClient();
+
+  // Pre-fill from URL, similar to SendScreen
+  useEffect(() => {
+    const w = searchParams.get("wallet");
+    const a = searchParams.get("amount");
+    const t = searchParams.get("token");
+    const c = searchParams.get("contract");
+    if (w) {
+      // nothing to autofill in request besides amount
+    }
+    if (a) setAmount(a);
+    if (t === "USDC") {
+      setSelectedToken("USDC");
+    } else if (t && t !== "ETH") {
+      setSelectedToken("CUSTOM");
+      if (c) setContractAddress(c);
+    }
+  }, [searchParams]);
 
   const generateLink = () => {
     if (!address) {
-      setModalMessage("Connect a wallet");
+      setModalMessage("Connect wallet first");
       return;
     }
     if (!amount) {
@@ -29,17 +52,13 @@ const RequestScreen: React.FC<Props> = ({ address, onBack }) => {
     const params = new URLSearchParams();
     params.set("wallet", address);
     params.set("amount", amount);
-    if (tokenType === "ERC20") {
-      if (!contractAddress) {
-        setModalMessage("Missing token address");
-        return;
-      }
-      params.set("token", "ERC20");
+    if (selectedToken !== "ETH") {
+      params.set("token", selectedToken);
       params.set("contract", contractAddress);
     } else {
       params.set("token", "ETH");
     }
-    setLink(`${window.location.origin}?${params.toString()}`);
+    setLink(`${window.location.origin}/?${params.toString()}`);
   };
 
   const copyLink = async () => {
@@ -50,72 +69,58 @@ const RequestScreen: React.FC<Props> = ({ address, onBack }) => {
   };
 
   return (
-    <div className="p-4 text-white bg-[#0f0d14]">
-      <button onClick={onBack} className="mb-4 flex items-center text-purple-400">
-        <FiArrowLeft className="w-5 h-5 mr-1" /> Back
+    <div className="p-4 text-white bg-[#0f0d14] min-h-screen flex flex-col items-end">
+      <button
+        onClick={onBack}
+        className="mb-4 flex items-center justify-end text-purple-400 text-lg px-4 py-2 bg-[#1a1725] rounded-lg max-w-[200px]"
+      >
+        <FiArrowLeft className="w-6 h-6 mr-2" /> Back
       </button>
-      <h2 className="text-2xl font-bold mb-4">Request Tokens</h2>
-      <div className="space-y-4">
-        <input
-          type="number"
-          placeholder="Amount"
-          className="w-full p-3 rounded-lg bg-[#1a1725] text-white"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-        />
 
-        <div className="flex space-x-4">
-          <label className="flex items-center">
-            <input
-              type="radio"
-              checked={tokenType === "ETH"}
-              onChange={() => setTokenType("ETH")}
-            />
-            <span className="ml-1">ETH</span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              checked={tokenType === "ERC20"}
-              onChange={() => setTokenType("ERC20")}
-            />
-            <span className="ml-1">ERC20</span>
-          </label>
+      <h2 className="text-2xl font-bold mb-6 mx-auto">Request</h2>
+
+      <div className="space-y-4 flex-1 w-full">
+        <div className="relative">
+          <input
+            type="number"
+            placeholder="Amount"
+            className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-base"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
         </div>
 
-        {tokenType === "ERC20" && (
-          <input
-            type="text"
-            placeholder="Token Contract Address"
-            className="w-full p-3 rounded-lg bg-[#1a1725] text-white"
-            value={contractAddress}
-            onChange={(e) => setContractAddress(e.target.value)}
-          />
-        )}
+        <TokenSelector
+          selected={selectedToken}
+          onSelect={setSelectedToken}
+          customAddress={contractAddress}
+          onCustomAddressChange={setContractAddress}
+          chainId={walletClient?.chain.id ?? 1}
+        />
 
         <button
           onClick={generateLink}
-          className="w-full py-3 rounded-xl font-bold bg-purple-600 hover:bg-purple-700"
+          className="w-full py-4 rounded-2xl font-bold bg-purple-600 hover:bg-purple-700 text-lg"
         >
           Generate Link
         </button>
-      </div>
 
-      {link && (
-        <div className="mt-4 space-y-2">
-          <input
-            readOnly
-            className="w-full p-3 rounded-lg bg-[#252435] text-white"
-            value={link}
-          />
-          <button
-            onClick={copyLink}
-            className="w-full py-2 rounded-md bg-blue-500 hover:bg-blue-600"
-          >
-            Copy Link
-          </button>
-        </div>
-      )}
+        {link && (
+          <div className="mt-4 space-y-2">
+            <input
+              readOnly
+              className="w-full p-4 rounded-lg bg-[#252435] text-white text-base"
+              value={link}
+            />
+            <button
+              onClick={copyLink}
+              className="w-full py-4 rounded-2xl bg-blue-500 hover:bg-blue-600 text-lg font-bold"
+            >
+              Copy Link
+            </button>
+          </div>
+        )}
+      </div>
 
       {modalMessage && (
         <AlertModal message={modalMessage} onClose={() => setModalMessage(null)} />

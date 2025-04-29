@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import AlertModal from "./AlertModal";
-import { createAirdrop } from "../services/api";
+import { createAirdrop } from "../services/contractService";
 import { useWalletClient } from "wagmi";
 
 interface AirdropScreenProps {
