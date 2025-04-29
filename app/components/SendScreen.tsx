@@ -75,7 +75,7 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
         setModalMessage(`Sent: ${tx.summary}`);
       } else {
         // ERC20 flow
-        let addr = contractAddress;
+        const addr = contractAddress;
         if (!addr) {
           setModalMessage("Missing token contract address");
           return;
