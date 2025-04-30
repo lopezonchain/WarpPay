@@ -6,7 +6,8 @@ const WarpPayApp = dynamic(() => import('./page-client'), { ssr: false });
 export async function generateMetadata({ searchParams }: { searchParams: { [key: string]: string } }): Promise<Metadata> {
   const wallet = searchParams.wallet;
   const amount = searchParams.amount;
-  const token = searchParams.token || "ETH";
+  const token = searchParams.token;
+  const contract = searchParams.token;
 
   const isPayment = wallet && amount;
 
@@ -29,7 +30,7 @@ export async function generateMetadata({ searchParams }: { searchParams: { [key:
           action: {
             type: "launch_frame",
             url: isPayment
-              ? `https://warppay.lopezonchain.xyz?wallet=${wallet}&amount=${amount}&token=${token}`
+              ? `https://warppay.lopezonchain.xyz?wallet=${wallet}&amount=${amount}&token=${token}&contract=${contract}`
               : "https://warppay.lopezonchain.xyz",
             name: "WarpPay",
             splashImageUrl: "https://warppay.lopezonchain.xyz/WarpPayLogo.png",
