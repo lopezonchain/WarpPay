@@ -7,7 +7,7 @@ export async function generateMetadata({ searchParams }: { searchParams: { [key:
   const wallet = searchParams.wallet;
   const amount = searchParams.amount;
   const token = searchParams.token;
-  const contract = searchParams.token;
+  const contract = searchParams.contract;
 
   const isPayment = wallet && amount;
 
