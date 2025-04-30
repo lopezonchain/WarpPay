@@ -18,7 +18,7 @@ interface AirdropScreenProps {
 // Lista de recomendados de ejemplo
 const recommendedList = [
   { label: "Alice", address: "alice.eth" },
-  { label: "Bob",   address: "bob.eth"   },
+  { label: "Bob", address: "bob.eth" },
   { label: "Carol", address: "carol.eth" },
 ];
 
@@ -32,8 +32,8 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
   const [mode, setMode] = useState<Mode>("csv");
   const [useSameAmount, setUseSameAmount] = useState(true);
 
-  const [tokenOption, setTokenOption]       = useState<TokenOption>("ETH");
-  const [customTokenAddress, setCustomTokenAddress] = useState("");
+  const [tokenOption, setTokenOption] = useState<TokenOption>("ETH");
+  const [contractAddress, setContractAddress] = useState("");
 
   // recomendado:
   const [amountPerRecipient, setAmountPerRecipient] = useState("");
@@ -50,11 +50,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
   const [modalMessage, setModalMessage] = useState<string | null>(null);
 
   // calcular tokenAddress o null para ETH
-  const tokenAddress = tokenOption === "ETH"
-    ? null
-    : tokenOption === "USDC"
-      ? undefined  // TokenSelector se encarga de USDC
-      : (customTokenAddress as `0x${string}`);
+  const tokenAddress = tokenOption === "ETH" ? null : (contractAddress as `0x${string}`);
 
   // Helper para parsear cada cantidad según token
   async function parseAmount(amt: string) {
@@ -174,13 +170,13 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
 
       {/* Token selector */}
       <div className="space-y-4 flex-2 w-full">
-      <TokenSelector
-        selected={tokenOption}
-        onSelect={setTokenOption}
-        customAddress={customTokenAddress}
-        onCustomAddressChange={setCustomTokenAddress}
-        chainId={walletClient?.chain.id ?? 1}
-      /></div>
+        <TokenSelector
+          selected={tokenOption}
+          onSelect={setTokenOption}
+          customAddress={contractAddress}
+          onCustomAddressChange={setContractAddress}
+          chainId={walletClient?.chain.id ?? 1}
+        /></div>
 
       {/* Mode tabs */}
       <div className="flex space-x-2 mt-4 mb-6">
@@ -188,17 +184,16 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
           <button
             key={m}
             onClick={() => setMode(m)}
-            className={`px-4 py-2 rounded-full text-sm font-medium ${
-              mode === m
+            className={`px-4 py-2 rounded-full text-sm font-medium ${mode === m
                 ? "bg-purple-600 text-white"
                 : "bg-[#1a1725] text-gray-300 hover:bg-[#2a2438]"
-            }`}
+              }`}
           >
             {m === "recommended"
               ? "Recommended"
               : m === "manual"
-              ? "Manual"
-              : "Paste CSV"}
+                ? "Manual"
+                : "Paste CSV"}
           </button>
         ))}
       </div>
@@ -326,8 +321,8 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
             <textarea
               placeholder={
                 useSameAmount
-                  ? "Paste one address per line"
-                  : "Paste address,amount per line"
+                  ? "One recipient address or ens per line"
+                  : "recipient,amount per line"
               }
               className="w-full h-40 p-3 rounded-lg bg-[#1a1725] text-white"
               value={csvText}
