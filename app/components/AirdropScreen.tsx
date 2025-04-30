@@ -169,7 +169,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
         <FiArrowLeft className="w-5 h-5 mr-1" /> Back
       </button>
 
-      <h2 className="text-2xl font-bold mb-4">Multisend</h2>
+      <h2 className="text-2xl font-bold mb-4">Airdrop</h2>
 
       {/* Token selector */}
       <div className="space-y-4 flex-2 w-full">
@@ -340,7 +340,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
         onClick={handleAirdrop}
         className="mt-4 w-full py-3 rounded-xl font-bold bg-purple-600 hover:bg-purple-700 transition"
       >
-        Multisend
+        Send Airdrop
       </button>
 
       {modalMessage && (
