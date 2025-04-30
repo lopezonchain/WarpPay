@@ -31,7 +31,7 @@ import { Fragment } from "react";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 import {
-  mainnet, arbitrum, optimism, polygon, avalanche, fantom, gnosis, celo, base, abstract, aurora, bsc, dogechain, 
+  mainnet, arbitrum, optimism, polygon, avalanche, fantom, gnosis, celo, base, abstract, aurora, bsc, dogechain,
   linea, metis, moonbeam, neonMainnet, polygonZkEvm, sonic, tron, zksync,
   baseSepolia,
 } from "wagmi/chains";
@@ -331,7 +331,18 @@ export default function Page(): JSX.Element {
               <Listbox value={selectedChain.id} onChange={(id: number) => handleChainChange(id)}>
                 <div className="relative w-48 text-base">
                   <ListboxButton className="w-full flex justify-between items-center bg-[#1a1725] text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600">
-                    {chainOptions.find((o) => o.chain.id === selectedChain.id)?.label}
+                    <div className="flex items-center space-x-2">
+                      {selectedChain.id === 8453 && (
+                        <img
+                          src="https://github.com/base/brand-kit/blob/main/logo/symbol/Base_Symbol_Blue.png?raw=true"
+                          alt="Base logo"
+                          className="w-5 h-5"
+                        />
+                      )}
+                      <span>
+                        {chainOptions.find((o) => o.chain.id === selectedChain.id)?.label}
+                      </span>
+                    </div>
                     <FiChevronDown className="ml-2" />
                   </ListboxButton>
 
@@ -353,7 +364,16 @@ export default function Page(): JSX.Element {
                         >
                           {({ selected }) => (
                             <div className="flex justify-between items-center">
-                              <span>{o.label}</span>
+                              <div className="flex items-center space-x-2">
+                                {o.chain.id === 8453 && (
+                                  <img
+                                    src="https://github.com/base/brand-kit/blob/main/logo/symbol/Base_Symbol_Blue.png?raw=true"
+                                    alt="Base logo"
+                                    className="w-4 h-4"
+                                  />
+                                )}
+                                <span>{o.label}</span>
+                              </div>
                               {selected && <FiChevronUp className="text-purple-400" />}
                             </div>
                           )}
@@ -363,6 +383,7 @@ export default function Page(): JSX.Element {
                   </Transition>
                 </div>
               </Listbox>
+
             )}
 
           </div>

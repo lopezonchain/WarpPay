@@ -27,7 +27,7 @@ type Mode = "recommended" | "manual" | "csv";
 const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
-  const [chainId, setChainId] = useState<number>();
+  const [chainId, setChainId] = useState<number>(0);
 
   useEffect(() => {
     publicClient?.getChainId().then(id => setChainId(id));
@@ -160,18 +160,19 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
     }
   };
 
-  if (chainId !== 8453) {
+  if (chainId && chainId !== 8453) {
     return (
-      <div className="p-4 text-white bg-[#0f0d14] min-h-screen flex flex-col">
+      <div className="p-4 text-white bg-[#0f0d14] min-h-screen flex flex-col items-end ">
         {/* Back */}
         <button
           onClick={onBack}
-          className="mb-4 flex items-center text-purple-400"
+          className="mb-4 flex items-center justify-end text-purple-400 text-lg px-4 py-2 bg-[#1a1725] rounded-lg max-w-[200px]"
         >
-          <FiArrowLeft className="w-5 h-5 mr-1" /> Back
+          <FiArrowLeft className="w-6 h-6 mr-2" /> Back
         </button>
-
-        <h2 className="text-2xl font-bold mb-4">Airdrop</h2>
+    
+        {/* Título centrado */}
+        <h2 className="text-2xl font-bold mb-6 mx-auto">Airdrop</h2>
         <div className="p-4 text-white bg-[#0f0d14] min-h-screen flex items-start justify-center">
           Only working on Base... yet! Send your suggestions
         </div>
