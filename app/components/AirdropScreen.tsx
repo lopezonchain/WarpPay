@@ -180,17 +180,18 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
   }
 
   return (
-    <div className="p-4 text-white bg-[#0f0d14] min-h-screen flex flex-col">
+    <div className="p-4 text-white bg-[#0f0d14] min-h-screen flex flex-col items-end ">
       {/* Back */}
       <button
         onClick={onBack}
-        className="mb-4 flex items-center text-purple-400"
+        className="mb-4 flex items-center justify-end text-purple-400 text-lg px-4 py-2 bg-[#1a1725] rounded-lg max-w-[200px]"
       >
-        <FiArrowLeft className="w-5 h-5 mr-1" /> Back
+        <FiArrowLeft className="w-6 h-6 mr-2" /> Back
       </button>
-
-      <h2 className="text-2xl font-bold mb-4">Airdrop</h2>
-
+  
+      {/* Título centrado */}
+      <h2 className="text-2xl font-bold mb-6 mx-auto">Airdrop</h2>
+  
       {/* Token selector */}
       <div className="space-y-4 flex-2 w-full">
         <TokenSelector
@@ -199,10 +200,11 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
           customAddress={contractAddress}
           onCustomAddressChange={setContractAddress}
           chainId={walletClient?.chain.id ?? 1}
-        /></div>
+        />
+      </div>
 
       {/* Mode tabs */}
-      <div className="flex space-x-2 mt-4 mb-6">
+      <div className="flex space-x-2 mt-4 mb-6 ">
         {([/*"recommended", */"csv", "manual"] as Mode[]).map((m) => (
           <button
             key={m}
@@ -222,7 +224,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
       </div>
 
       {/* Panels */}
-      <div className="space-y-4 flex flex-col items-end">
+      <div className="space-y-4 flex flex-col items-end w-full">
         {/* Recommended */}
         {mode === "recommended" && (
           <>
@@ -357,7 +359,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
 
       <button
         onClick={handleAirdrop}
-        className="mt-4 w-full py-3 rounded-xl font-bold bg-purple-600 hover:bg-purple-700 transition"
+        className="w-full py-4 rounded-2xl mt-4 font-bold bg-purple-600 hover:bg-purple-700 text-lg"
       >
         Send Airdrop
       </button>
