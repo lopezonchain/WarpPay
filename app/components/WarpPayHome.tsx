@@ -27,13 +27,13 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
 
   return (
     <div className="bg-[#0f0d14] text-white px-4 py-4 flex flex-col items-center w-full">
-      <div className="flex items-end mb-4">
+      <div className="flex items-end mb-2">
         <h1 className="text-4xl font-bold">WarpPay</h1>
         <h3 className="text-xl font-bold text-[#8565CB] ml-2">beta</h3>
         <span className="text-3xl ml-2">💸</span>
       </div>
       <p className="text-sm text-gray-400 mb-4 text-center">
-        Easy Onchain Payments. Farcaster and Coinbase Miniapp
+        Easy Onchain Payments<br/> Farcaster and Coinbase Miniapp
       </p>
 
       <div className="flex flex-col space-y-4 w-full max-w-md">

@@ -39,7 +39,7 @@ import {
 export type WarpView = "home" | "send" | "request" | "airdrop" | "history" | "scheduled";
 
 const chainOptions = [
-  { label: "Sepolia", chain: baseSepolia },
+  //{ label: "Sepolia", chain: baseSepolia },
   { label: "Base", chain: base },
   { label: "Ethereum", chain: mainnet },
   { label: "Arbitrum", chain: arbitrum },
