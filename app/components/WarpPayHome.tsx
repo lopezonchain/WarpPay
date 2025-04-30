@@ -70,7 +70,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
       </div>
 
       <a
-        href="?wallet=0xa74C3EBF7e700175945702Cd9Ea3D09D5e654321&amount=0.01&token=ETH"
+        href="?wallet=lopezonchain.eth&amount=0.01&token=ETH"
         className="mt-6 w-full max-w-sm bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg text-center shadow-lg transition"
       >
         Support WarpPay 💜
