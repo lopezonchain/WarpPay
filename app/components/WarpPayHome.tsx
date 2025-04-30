@@ -18,7 +18,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
     enabled: boolean;
     fee: number;
   }[] = [
-      { icon: <FiSend />, label: "Send", desc: "Instantly send ETH or tokens to any wallet or ENS / Basename", action: "send", enabled: true, fee: 0 },
+      { icon: <FiSend />, label: "Send", desc: "Instantly send ETH or tokens to any wallet, ENS or Basename", action: "send", enabled: true, fee: 0 },
       { icon: <FiDollarSign />, label: "Request", desc: "Generate a payment request link that anyone can fulfill.", action: "request", enabled: true, fee: 0 },
       { icon: <FiGift />, label: "Airdrop", desc: "Distribute tokens to multiple addresses at once, saving time and gas fees.", action: "airdrop", enabled: true, fee: 2 },
       { icon: <FiClock />, label: "Scheduled", desc: "Schedule one-time or recurring payments.", action: "scheduled", enabled: false, fee: 3 },
@@ -33,7 +33,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
         <span className="text-3xl ml-2">💸</span>
       </div>
       <p className="text-sm text-gray-400 mb-4 text-center">
-        Easy Onchain Payments<br/> Farcaster and Coinbase Miniapp
+        Easy Onchain Payments<br /> Farcaster and Coinbase Miniapp
       </p>
 
       <div className="flex flex-col space-y-4 w-full max-w-md">
@@ -43,8 +43,8 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
             onClick={() => enabled && onAction(action)}
             disabled={!enabled}
             className={`relative w-full rounded-xl px-5 py-4 text-left shadow-md transition border ${enabled
-                ? "bg-[#1a1725] hover:bg-[#2a2438] border-[#2a2438]"
-                : "bg-[#1a1725] border-[#3a3448] opacity-50 cursor-not-allowed"
+              ? "bg-[#1a1725] hover:bg-[#2a2438] border-[#2a2438]"
+              : "bg-[#1a1725] border-[#3a3448] opacity-50 cursor-not-allowed"
               }`}
           >
             {/* fee tag */}
@@ -65,6 +65,14 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
               )}
             </div>
             <div className="text-xs text-gray-400 pl-8">{desc}</div>
+            {/* Logo de red Base */}
+            {(action === "airdrop" || action === "scheduled") && (
+              <img
+                src="https://github.com/base/brand-kit/blob/main/logo/symbol/Base_Symbol_Blue.png?raw=true"
+                alt="Base logo"
+                className="absolute bottom-1 right-1 w-4 h-4 opacity-80"
+              />
+            )}
           </button>
         ))}
       </div>
