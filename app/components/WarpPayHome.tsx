@@ -22,7 +22,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
       { icon: <FiDollarSign />, label: "Request", desc: "Generate a payment request link that anyone can fulfill.", action: "request", enabled: true, fee: 0 },
       { icon: <FiGift />, label: "Multisend / Airdrop", desc: "Distribute tokens to multiple addresses at once.", action: "airdrop", enabled: false, fee: 2 },
       { icon: <FiClock />, label: "Scheduled", desc: "Schedule one-time or recurring payments.", action: "scheduled", enabled: false, fee: 3 },
-      { icon: <FiBookOpen />, label: "Txs History", desc: "View your past transactions and activity logs.", action: "history", enabled: false, fee: 0 },
+      { icon: <FiBookOpen />, label: "History", desc: "View your past payments.", action: "history", enabled: false, fee: 0 },
     ];
 
   return (
