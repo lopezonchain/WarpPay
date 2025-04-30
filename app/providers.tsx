@@ -3,15 +3,28 @@
 import React, { ReactNode, Suspense, useEffect, useState } from "react";
 import { WagmiProvider, createConfig, http } from "wagmi";
 import {
-  mainnet,
-  arbitrum,
-  optimism,
-  polygon,
-  avalanche,
-  fantom,
-  gnosis,
-  celo,
-  base,
+  base,               // Base
+  mainnet,            // Ethereum
+  arbitrum,           // Arbitrum One
+  sonic,              // Sonic
+  abstract,           // Abstract
+  optimism,           // Optimism
+  polygon,            // Polygon PoS
+  avalanche,          // Avalanche C-Chain
+  fantom,             // Fantom Opera
+  gnosis,             // Gnosis Chain
+  celo,               // Celo Mainnet
+  bsc,                // Binance Smart Chain
+  polygonZkEvm,       // Polygon zkEVM
+  zksync,             // zkSync (L2)
+  scroll,             // Scroll L2
+  linea,              // Linea
+  metis,              // Metis Andromeda
+  dogechain,          // Dogechain
+  tron,               // TRON EVM
+  aurora,             // NEAR Aurora
+  moonbeam,           // Moonbeam
+  neonMainnet,        // Neon EVM (Solana)
 } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MiniKitProvider } from "@coinbase/onchainkit/minikit";
@@ -20,20 +33,39 @@ import { useWalletClient } from "wagmi";
 // 1️⃣ Crear QueryClient para React Query
 const queryClient = new QueryClient();
 
-// 2️⃣ Crear wagmi config
+// 2️⃣ Crear wagmi config con todas las chains importadas
+const chains = [
+  base,
+  mainnet,
+  arbitrum,
+  sonic,
+  abstract,
+  optimism,
+  polygon,
+  avalanche,
+  fantom,
+  gnosis,
+  celo,
+  bsc,
+  polygonZkEvm,
+  zksync,
+  scroll,
+  linea,
+  metis,
+  dogechain,
+  tron,
+  aurora,
+  moonbeam,
+  neonMainnet,
+];
+
+const transports = Object.fromEntries(
+  chains.map((chain) => [chain.id, http({ url: chain.rpcUrls.default.http[0] })])
+);
+
 const config = createConfig({
-  chains: [mainnet, arbitrum, optimism, polygon, avalanche, fantom, gnosis, celo, base],
-  transports: {
-    [mainnet.id]: http(),
-    [arbitrum.id]: http(),
-    [optimism.id]: http(),
-    [polygon.id]: http(),
-    [avalanche.id]: http(),
-    [fantom.id]: http(),
-    [gnosis.id]: http(),
-    [celo.id]: http(),
-    [base.id]: http(),
-  },
+  chains,
+  transports,
   ssr: true,
 });
 
@@ -42,12 +74,25 @@ type ChainType =
   | typeof base
   | typeof mainnet
   | typeof arbitrum
+  | typeof sonic
+  | typeof abstract
   | typeof optimism
   | typeof polygon
   | typeof avalanche
   | typeof fantom
   | typeof gnosis
-  | typeof celo;
+  | typeof celo
+  | typeof bsc
+  | typeof polygonZkEvm
+  | typeof zksync
+  | typeof scroll
+  | typeof linea
+  | typeof metis
+  | typeof dogechain
+  | typeof tron
+  | typeof aurora
+  | typeof moonbeam
+  | typeof neonMainnet;
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -63,22 +108,37 @@ function MiniKitWrapper({ children }: { children: ReactNode }) {
   const { data: walletClient } = useWalletClient();
   const [selectedChain, setSelectedChain] = useState<ChainType>(mainnet);
 
-  const chainOptions = [
+  const chainOptions: { label: string; chain: ChainType }[] = [
     { label: "Base", chain: base },
     { label: "Ethereum", chain: mainnet },
     { label: "Arbitrum", chain: arbitrum },
+    { label: "Sonic", chain: sonic },
+    { label: "Abstract", chain: abstract },
     { label: "Optimism", chain: optimism },
     { label: "Polygon", chain: polygon },
     { label: "Avalanche", chain: avalanche },
     { label: "Fantom", chain: fantom },
     { label: "Gnosis", chain: gnosis },
     { label: "Celo", chain: celo },
+    { label: "BSC", chain: bsc },
+    { label: "Polygon zkEVM", chain: polygonZkEvm },
+    { label: "zkSync", chain: zksync },
+    { label: "Scroll", chain: scroll },
+    { label: "Linea", chain: linea },
+    { label: "Metis", chain: metis },
+    { label: "Dogechain", chain: dogechain },
+    { label: "Tron", chain: tron },
+    { label: "Aurora", chain: aurora },
+    { label: "Moonbeam", chain: moonbeam },
+    { label: "Neon EVM", chain: neonMainnet },
   ];
 
   useEffect(() => {
     if (walletClient) {
       const found = chainOptions.find((o) => o.chain.id === walletClient.chain.id);
-      if (found) setSelectedChain(found.chain);
+      if (found) {
+        setSelectedChain(found.chain);
+      }
     }
   }, [walletClient]);
 

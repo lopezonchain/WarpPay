@@ -2,7 +2,8 @@
 import contractAbi from "./contractAbi.json";
 import { createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
-import { normalize } from "viem/ens";
+import { resolveEnsName } from "./ensResolver";
+
 
 // 1️⃣ Make an ENS‐only client on Mainnet
 const ensClient = createPublicClient({
@@ -45,10 +46,7 @@ export async function sendTokens(
   // 2️⃣ Resolve ENS names via our ENS client
   let recipient: `0x${string}`;
   if (!to.startsWith("0x")) {
-    const name = normalize(to);
-    const resolved = await ensClient.getEnsAddress({ name });
-    if (!resolved) throw new Error(`Could not resolve ENS name: ${to}`);
-    recipient = resolved as `0x${string}`;
+    recipient = await resolveEnsName(to);
   } else {
     recipient = to as `0x${string}`;
   }

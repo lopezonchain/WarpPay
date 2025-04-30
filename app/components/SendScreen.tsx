@@ -113,7 +113,7 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
       <div className="space-y-4 flex-1 w-full">
         <input
           type="text"
-          placeholder="Recipient Address"
+          placeholder="Recipient wallet or name"
           className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-base"
           value={to}
           onChange={(e) => setTo(e.target.value)}
