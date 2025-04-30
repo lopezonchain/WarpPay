@@ -274,7 +274,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
             {useSameAmount && (
               <input
                 type="number"
-                placeholder="Amount for everyone"
+                placeholder="Amount for each recipient"
                 className="w-full p-3 rounded-lg bg-[#1a1725] text-white mb-2"
                 value={amountPerRecipient}
                 onChange={(e) => setAmountPerRecipient(e.target.value)}
@@ -337,7 +337,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
             {useSameAmount && (
               <input
                 type="number"
-                placeholder="Amount for everyone"
+                placeholder="Amount for each recipient"
                 className="w-full p-3 rounded-lg bg-[#1a1725] text-white mb-2"
                 value={amountPerRecipient}
                 onChange={(e) => setAmountPerRecipient(e.target.value)}
