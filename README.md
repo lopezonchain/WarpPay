@@ -41,7 +41,7 @@
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-org/warp-pay.git
+git clone https://github.com/lopezonchain/WarpPay.git
 cd warp-pay
 
 # Install dependencies
