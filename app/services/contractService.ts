@@ -43,7 +43,7 @@ export async function sendTokens(
 ): Promise<Tx> {
   if (!walletClient) throw new Error("No wallet client available");
 
-  // 2️⃣ Resolve ENS names via our ENS client
+  // 2️⃣ Resolve ENS names
   let recipient: `0x${string}`;
   if (!to.startsWith("0x")) {
     recipient = await resolveEnsName(to);

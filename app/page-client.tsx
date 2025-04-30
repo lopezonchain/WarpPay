@@ -26,10 +26,25 @@ import SendScreen from "./components/SendScreen";
 import RequestScreen from "./components/RequestScreen";
 import AirdropScreen from "./components/AirdropScreen";
 import HistoryScreen from "./components/HistoryScreen";
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from "@headlessui/react";
+import { Fragment } from "react";
+import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 import {
   mainnet, arbitrum, optimism, polygon, avalanche,
   fantom, gnosis, celo, base,
+  abstract,
+  aurora,
+  bsc,
+  dogechain,
+  linea,
+  metis,
+  moonbeam,
+  neonMainnet,
+  polygonZkEvm,
+  sonic,
+  tron,
+  zksync,
 } from "wagmi/chains";
 
 export type WarpView = "home" | "send" | "request" | "airdrop" | "history" | "scheduled";
@@ -38,13 +53,27 @@ const chainOptions = [
   { label: "Base", chain: base },
   { label: "Ethereum", chain: mainnet },
   { label: "Arbitrum", chain: arbitrum },
+  { label: "Sonic", chain: sonic },
+  { label: "Abstract", chain: abstract },
   { label: "Optimism", chain: optimism },
   { label: "Polygon", chain: polygon },
   { label: "Avalanche", chain: avalanche },
   { label: "Fantom", chain: fantom },
   { label: "Gnosis", chain: gnosis },
   { label: "Celo", chain: celo },
+  { label: "BSC", chain: bsc },
+  { label: "Polygon zkEVM", chain: polygonZkEvm },
+  { label: "zkSync", chain: zksync },
+  //{ label: "Scroll", chain: scroll },
+  { label: "Linea", chain: linea },
+  { label: "Metis", chain: metis },
+  { label: "Dogechain", chain: dogechain },
+  { label: "Tron", chain: tron },
+  { label: "Aurora", chain: aurora },
+  { label: "Moonbeam", chain: moonbeam },
+  { label: "Neon EVM", chain: neonMainnet },
 ] as const;
+
 
 type ButtonProps = {
   children: ReactNode;
@@ -292,7 +321,7 @@ export default function Page(): JSX.Element {
     <div className="flex flex-col bg-[#0f0d14] font-sans text-[var(--app-foreground)] mini-app-theme">
       <div className="w-full max-w-md mx-auto px-4 py-3 min-h-screen">
         <header className="flex justify-between items-center mb-3 h-11">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-between space-x-2 w-full">
             <Wallet className="z-10">
               <ConnectWallet>
                 <Name className="text-inherit" />
@@ -308,17 +337,44 @@ export default function Page(): JSX.Element {
               </WalletDropdown>
             </Wallet>
 
-            <select
-              value={selectedChain.id}
-              onChange={(e) => handleChainChange(parseInt(e.target.value, 10))}
-              className="bg-[#1a1725] text-sm text-white p-2 rounded"
-            >
-              {chainOptions.map((o) => (
-                <option key={o.chain.id} value={o.chain.id}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
+            {address && (
+              <Listbox value={selectedChain.id} onChange={(id: number) => handleChainChange(id)}>
+                <div className="relative w-48 text-base">
+                  <ListboxButton className="w-full flex justify-between items-center bg-[#1a1725] text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600">
+                    {chainOptions.find((o) => o.chain.id === selectedChain.id)?.label}
+                    <FiChevronDown className="ml-2" />
+                  </ListboxButton>
+
+                  <Transition
+                    as={Fragment}
+                    leave="transition ease-in duration-100"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                  >
+                    <ListboxOptions className="absolute z-10 mt-1 w-full bg-[#1a1725] rounded-lg shadow-lg max-h-60 overflow-auto focus:outline-none">
+                      {chainOptions.map((o) => (
+                        <ListboxOption
+                          key={o.chain.id}
+                          value={o.chain.id}
+                          className={({ active, selected }) =>
+                            `cursor-pointer select-none px-4 py-2 ${active ? "bg-purple-600 text-white" : "text-gray-300"
+                            } ${selected ? "font-semibold" : ""}`
+                          }
+                        >
+                          {({ selected }) => (
+                            <div className="flex justify-between items-center">
+                              <span>{o.label}</span>
+                              {selected && <FiChevronUp className="text-purple-400" />}
+                            </div>
+                          )}
+                        </ListboxOption>
+                      ))}
+                    </ListboxOptions>
+                  </Transition>
+                </div>
+              </Listbox>
+            )}
+
           </div>
           <div>{saveFrameButton}</div>
         </header>

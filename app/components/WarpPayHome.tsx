@@ -18,12 +18,12 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
     enabled: boolean;
     fee: number;
   }[] = [
-    { icon: <FiSend />,         label: "Send",      desc: "Instantly send ETH or tokens to any wallet onchain.",                    action: "send",    enabled: true,  fee: 0 },
-    { icon: <FiDollarSign />,   label: "Request",   desc: "Generate a payment request link that anyone can fulfill.",              action: "request", enabled: true,  fee: 0 },
-    { icon: <FiGift />,         label: "Multisend / Airdrop", desc: "Distribute tokens to multiple addresses at once.",            action: "airdrop", enabled: false, fee: 2 },
-    { icon: <FiClock />,        label: "Scheduled",  desc: "Schedule one-time or recurring payments.",                            action: "scheduled", enabled: false, fee: 3 },
-    { icon: <FiBookOpen />,     label: "Txs History", desc: "View your past transactions and activity logs.",                      action: "history",   enabled: false, fee: 0 },
-  ];
+      { icon: <FiSend />, label: "Send", desc: "Instantly send ETH or tokens to any wallet or ENS / Basename", action: "send", enabled: true, fee: 0 },
+      { icon: <FiDollarSign />, label: "Request", desc: "Generate a payment request link that anyone can fulfill.", action: "request", enabled: true, fee: 0 },
+      { icon: <FiGift />, label: "Multisend / Airdrop", desc: "Distribute tokens to multiple addresses at once.", action: "airdrop", enabled: false, fee: 2 },
+      { icon: <FiClock />, label: "Scheduled", desc: "Schedule one-time or recurring payments.", action: "scheduled", enabled: false, fee: 3 },
+      { icon: <FiBookOpen />, label: "Txs History", desc: "View your past transactions and activity logs.", action: "history", enabled: false, fee: 0 },
+    ];
 
   return (
     <div className="bg-[#0f0d14] text-white px-4 py-6 flex flex-col items-center w-full">
@@ -42,11 +42,10 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
             key={action}
             onClick={() => enabled && onAction(action)}
             disabled={!enabled}
-            className={`relative w-full rounded-xl px-5 py-4 text-left shadow-md transition border ${
-              enabled
+            className={`relative w-full rounded-xl px-5 py-4 text-left shadow-md transition border ${enabled
                 ? "bg-[#1a1725] hover:bg-[#2a2438] border-[#2a2438]"
                 : "bg-[#1a1725] border-[#3a3448] opacity-50 cursor-not-allowed"
-            }`}
+              }`}
           >
             {/* fee tag */}
             {action !== "history" && (

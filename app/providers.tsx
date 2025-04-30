@@ -69,31 +69,6 @@ const config = createConfig({
   ssr: true,
 });
 
-// 💡 Tipado flexible para las chains
-type ChainType =
-  | typeof base
-  | typeof mainnet
-  | typeof arbitrum
-  | typeof sonic
-  | typeof abstract
-  | typeof optimism
-  | typeof polygon
-  | typeof avalanche
-  | typeof fantom
-  | typeof gnosis
-  | typeof celo
-  | typeof bsc
-  | typeof polygonZkEvm
-  | typeof zksync
-  | typeof scroll
-  | typeof linea
-  | typeof metis
-  | typeof dogechain
-  | typeof tron
-  | typeof aurora
-  | typeof moonbeam
-  | typeof neonMainnet;
-
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
