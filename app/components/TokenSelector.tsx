@@ -80,7 +80,7 @@ export default function TokenSelector({
             key={opt}
             onClick={() => {
               onSelect(opt);
-              if (opt === "ETH") {
+              if (opt === "ETH" || "CUSTOM") {
                 onCustomAddressChange("");
               }
             }}
@@ -88,7 +88,7 @@ export default function TokenSelector({
               ${selected === opt ? "bg-purple-600" : "bg-[#1a1725]"}
               hover:bg-purple-500 transition`}
           >
-            {opt === "CUSTOM" ? "Custom Token" : opt}
+            {opt === "CUSTOM" ? "Other" : opt}
           </button>
         ))}
       </div>
