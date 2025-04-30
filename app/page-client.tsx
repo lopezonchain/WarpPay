@@ -390,7 +390,7 @@ export default function Page(): JSX.Element {
           <div>{saveFrameButton}</div>
         </header>
 
-        <main className="flex-1">
+        <main className="flex-1 h-auto">
           {warpView === "home" && <WarpPayHome onAction={(view) => setWarpView(view)} />}
           {warpView === "send" && <SendScreen address={address} onBack={handleBack} />}
           {warpView === "request" && <RequestScreen address={address} onBack={handleBack} />}

@@ -162,7 +162,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
 
   if (chainId && chainId !== 8453) {
     return (
-      <div className="p-4 text-white bg-[#0f0d14] min-h-screen flex flex-col items-end ">
+      <div className="p-4 text-white bg-[#0f0d14] flex flex-col items-end ">
         {/* Back */}
         <button
           onClick={onBack}

@@ -69,7 +69,7 @@ const RequestScreen: React.FC<RequestScreenProps> = ({ address, onBack }) => {
   };
 
   return (
-    <div className="p-4 text-white bg-[#0f0d14] min-h-screen flex flex-col items-end">
+    <div className="p-4 text-white bg-[#0f0d14] flex flex-col items-end">
       <button
         onClick={onBack}
         className="mb-4 flex items-center justify-end text-purple-400 text-lg px-4 py-2 bg-[#1a1725] rounded-lg max-w-[200px]"
@@ -79,7 +79,7 @@ const RequestScreen: React.FC<RequestScreenProps> = ({ address, onBack }) => {
 
       <h2 className="text-2xl font-bold mb-6 mx-auto">Request</h2>
 
-      <div className="space-y-4 flex-1 w-full">
+      <div className="space-y-4 flex-2 w-full">
         <div className="relative">
           <input
             type="number"
