@@ -31,25 +31,15 @@ import { Fragment } from "react";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 import {
-  mainnet, arbitrum, optimism, polygon, avalanche,
-  fantom, gnosis, celo, base,
-  abstract,
-  aurora,
-  bsc,
-  dogechain,
-  linea,
-  metis,
-  moonbeam,
-  neonMainnet,
-  polygonZkEvm,
-  sonic,
-  tron,
-  zksync,
+  mainnet, arbitrum, optimism, polygon, avalanche, fantom, gnosis, celo, base, abstract, aurora, bsc, dogechain, 
+  linea, metis, moonbeam, neonMainnet, polygonZkEvm, sonic, tron, zksync,
+  baseSepolia,
 } from "wagmi/chains";
 
 export type WarpView = "home" | "send" | "request" | "airdrop" | "history" | "scheduled";
 
 const chainOptions = [
+  { label: "Sepolia", chain: baseSepolia },
   { label: "Base", chain: base },
   { label: "Ethereum", chain: mainnet },
   { label: "Arbitrum", chain: arbitrum },

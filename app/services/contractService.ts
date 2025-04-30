@@ -4,8 +4,48 @@ import { createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
 import { resolveEnsName } from "./ensResolver";
 
+export const erc20Abi = [
+  {
+    "inputs": [
+      { "internalType": "address", "name": "spender", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "approve",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "recipient", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "transfer",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "sender", "type": "address" },
+      { "internalType": "address", "name": "recipient", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "transferFrom",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "decimals",
+    "outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
 
-// 1️⃣ Make an ENS‐only client on Mainnet
+// ENS‐only client on Mainnet
 const ensClient = createPublicClient({
   chain: mainnet,
   transport: http("https://eth.llamarpc.com"),
@@ -92,6 +132,7 @@ export async function sendTokens(
  */
 export async function createAirdrop(
   walletClient: any,
+  publicClient: any,
   tokenAddress: `0x${string}` | null,
   recipients: `0x${string}`[],
   values: bigint[]
@@ -99,7 +140,26 @@ export async function createAirdrop(
   if (!walletClient) throw new Error("No wallet client available");
 
   let txHash: string;
+
   if (tokenAddress) {
+    // 1) Calcular neto total y fee
+    const totalNet = values.reduce((acc, v) => Number(acc) + Number(v), 0);
+    const totalFee = (BigInt(totalNet) * BigInt(2)) /  BigInt(100);
+
+    // 2) Aprobar al contrato la suma neta + fee
+    const approveTxHash = await walletClient.writeContract({
+      address: tokenAddress,
+      abi: erc20Abi,
+      functionName: "approve",
+      args: [WARPPAY_CONTRACT, BigInt(totalNet) + totalFee],
+    });
+
+    // 3) Esperar a que la aprobación sea confirmada
+    await publicClient.waitForTransactionReceipt({
+      hash: approveTxHash,
+    });
+
+    // 4) Llamar a multisendToken con los valores netos
     txHash = await walletClient.writeContract({
       address: WARPPAY_CONTRACT,
       abi: contractAbi,
@@ -107,13 +167,15 @@ export async function createAirdrop(
       args: [tokenAddress, recipients, values],
     });
   } else {
-    const total = values.reduce((acc, v) => Number(acc) + Number(v), 0);
+    const totalNet = values.reduce((acc, v) => Number(acc) + Number(v), 0);
+    const totalFee = (BigInt(totalNet) * BigInt(2)) /  BigInt(100);
+
     txHash = await walletClient.writeContract({
       address: WARPPAY_CONTRACT,
       abi: contractAbi,
       functionName: "multisendEther",
       args: [recipients, values],
-      value: total,
+      value: BigInt(totalNet) + totalFee,
     });
   }
 

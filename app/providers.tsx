@@ -25,7 +25,8 @@ import {
   aurora,             // NEAR Aurora
   moonbeam,           // Moonbeam
   neonMainnet,
-  Chain,        // Neon EVM (Solana)
+  Chain,
+  baseSepolia,        // Neon EVM (Solana)
 } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MiniKitProvider } from "@coinbase/onchainkit/minikit";
@@ -53,7 +54,8 @@ type ChainType =
   | typeof tron
   | typeof aurora
   | typeof moonbeam
-  | typeof neonMainnet;
+  | typeof neonMainnet
+  | typeof baseSepolia;
 
 
 // 1️⃣ Crear QueryClient para React Query
@@ -83,6 +85,7 @@ const chains: [Chain, ...Chain[]] = [
   aurora,
   moonbeam,
   neonMainnet,
+  baseSepolia
 ];
 
 
@@ -135,6 +138,7 @@ function MiniKitWrapper({ children }: { children: ReactNode }) {
     { label: "Aurora", chain: aurora },
     { label: "Moonbeam", chain: moonbeam },
     { label: "Neon EVM", chain: neonMainnet },
+    { label: "Base Sepolia", chain: baseSepolia }
   ];
 
   useEffect(() => {

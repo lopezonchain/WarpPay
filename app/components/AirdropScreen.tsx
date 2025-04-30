@@ -148,6 +148,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
       setModalMessage("Multisending…");
       const tx = await createAirdrop(
         walletClient,
+        publicClient,
         tokenAddress ?? null,
         recipients,
         values
