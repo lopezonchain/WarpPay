@@ -1,6 +1,14 @@
 // src/services/contractService.ts
-
 import contractAbi from "./contractAbi.json";
+import { createPublicClient, http } from "viem";
+import { mainnet } from "viem/chains";
+import { normalize } from "viem/ens";
+
+// 1️⃣ Make an ENS‐only client on Mainnet
+const ensClient = createPublicClient({
+  chain: mainnet,
+  transport: http("https://eth.llamarpc.com"),
+});
 
 export interface Tx {
   summary: string;
@@ -28,13 +36,24 @@ const WARPPAY_CONTRACT = process.env.NEXT_PUBLIC_WARPPAY_BASE_CONTRACT!;
  */
 export async function sendTokens(
   walletClient: any,
-  from: `0x${string}`,
-  to: `0x${string}`,
+  to: string,               // can be hex or ENS
   amount: bigint,
   tokenAddress?: `0x${string}`
 ): Promise<Tx> {
   if (!walletClient) throw new Error("No wallet client available");
 
+  // 2️⃣ Resolve ENS names via our ENS client
+  let recipient: `0x${string}`;
+  if (!to.startsWith("0x")) {
+    const name = normalize(to);
+    const resolved = await ensClient.getEnsAddress({ name });
+    if (!resolved) throw new Error(`Could not resolve ENS name: ${to}`);
+    recipient = resolved as `0x${string}`;
+  } else {
+    recipient = to as `0x${string}`;
+  }
+
+  // 3️⃣ Dispatch the transaction on the user’s chosen chain
   let txHash: string;
   if (tokenAddress) {
     txHash = await walletClient.writeContract({
@@ -52,11 +71,11 @@ export async function sendTokens(
         },
       ],
       functionName: "transfer",
-      args: [to, amount],
+      args: [recipient, amount],
     });
   } else {
     txHash = await walletClient.sendTransaction({
-      to,
+      to: recipient,
       value: amount,
     });
   }

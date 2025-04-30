@@ -70,7 +70,7 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
       if (tokenType === "ETH") {
         setModalMessage("Sending ETH...");
         const value = parseEther(amount);
-        const tx = await sendTokens(walletClient, address, to as `0x${string}`, value);
+        const tx = await sendTokens(walletClient, to, value);
         await publicClient.waitForTransactionReceipt({ hash: tx.hash as `0x${string}` });
         setModalMessage(`Sent: ${tx.summary}`);
       } else {
@@ -90,13 +90,7 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
         const parsed = parseUnits(amount, decimals);
 
         setModalMessage("Sending tokens...");
-        const tx = await sendTokens(
-          walletClient,
-          address,
-          to as `0x${string}`,
-          parsed,
-          addr as `0x${string}`
-        );
+        const tx = await sendTokens(walletClient, to, parsed, addr as `0x${string}`);
         await publicClient.waitForTransactionReceipt({ hash: tx.hash as `0x${string}` });
         setModalMessage(`Sent: ${tx.summary}`);
       }
