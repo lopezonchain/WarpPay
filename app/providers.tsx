@@ -24,17 +24,43 @@ import {
   tron,               // TRON EVM
   aurora,             // NEAR Aurora
   moonbeam,           // Moonbeam
-  neonMainnet,        // Neon EVM (Solana)
+  neonMainnet,
+  Chain,        // Neon EVM (Solana)
 } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MiniKitProvider } from "@coinbase/onchainkit/minikit";
 import { useWalletClient } from "wagmi";
 
+type ChainType =
+  | typeof base
+  | typeof mainnet
+  | typeof arbitrum
+  | typeof sonic
+  | typeof abstract
+  | typeof optimism
+  | typeof polygon
+  | typeof avalanche
+  | typeof fantom
+  | typeof gnosis
+  | typeof celo
+  | typeof bsc
+  | typeof polygonZkEvm
+  | typeof zksync
+  | typeof scroll
+  | typeof linea
+  | typeof metis
+  | typeof dogechain
+  | typeof tron
+  | typeof aurora
+  | typeof moonbeam
+  | typeof neonMainnet;
+
+
 // 1️⃣ Crear QueryClient para React Query
 const queryClient = new QueryClient();
 
 // 2️⃣ Crear wagmi config con todas las chains importadas
-const chains = [
+const chains: [Chain, ...Chain[]] = [
   base,
   mainnet,
   arbitrum,
@@ -59,8 +85,12 @@ const chains = [
   neonMainnet,
 ];
 
+
 const transports = Object.fromEntries(
-  chains.map((chain) => [chain.id, http({ url: chain.rpcUrls.default.http[0] })])
+  chains.map((chain) => [
+    chain.id,
+    http(chain.rpcUrls.default.http[0]),
+  ])
 );
 
 const config = createConfig({
@@ -68,7 +98,6 @@ const config = createConfig({
   transports,
   ssr: true,
 });
-
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
