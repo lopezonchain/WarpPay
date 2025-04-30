@@ -77,7 +77,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
       </a>
 
       <footer className="mt-2 text-xs text-gray-500 text-center">
-        <div>Connected to Farcaster ✦ Powered by Minikit</div>
+        <div>✦ Powered by Farcaster & Coinbase Minikit ✦</div>
       </footer>
     </div>
   );
