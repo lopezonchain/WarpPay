@@ -55,24 +55,16 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
   const [csvText, setCsvText] = useState("");
   const [modalMessage, setModalMessage] = useState<string | null>(null);
 
-  const [fid, setFid] = useState<number>(0);
-
-
   // Preload all data once
   useEffect(() => {
     (async () => {
       const context = (await sdk.context) as Context.FrameContext;
-      // Formateamos el objeto como JSON con indentación de 2 espacios
-      const pretty = JSON.stringify(context.user, null, 2);
-      // Y lo mostramos en el modal
-      setModalMessage(pretty);
-
-      setFid(context.user.fid);
+      const userFid = context.user.fid;
 
       try {
         const [followingRes, followersRes] = await Promise.all([
-          warpcast.getFollowing(fid),
-          warpcast.getFollowers(fid)
+          warpcast.getFollowing(userFid),
+          warpcast.getFollowers(userFid)
         ]);
         setDataByType({
           following: followingRes.users,
