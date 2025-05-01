@@ -9,7 +9,7 @@ import { resolveEnsName } from "../services/ensResolver";
 import { createAirdrop } from "../services/contractService";
 import { parseEther, parseUnits } from "viem";
 import { PrimaryAddressResult, WarpcastService, WarpcastUser } from "../services/warpcastService";
-import sdk from "@farcaster/frame-sdk";
+import sdk, { type Context } from "@farcaster/frame-sdk";
 
 const warpcast = new WarpcastService();
 
@@ -61,12 +61,11 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
   // Preload all data once
   useEffect(() => {
     (async () => {
-      // 1) Indica al host que estás listo y desbloquea el contexto
       await sdk.actions.ready();
-
-      // 2) Ahora sdk.context está poblado
-      const context = sdk.context;
-      console.log('Farcaster context:', context);
+  
+      const context = (await sdk.context) as Context.FrameContext;
+  
+      console.log("Farcaster context:", context);
       setFid(context.user.fid);
 
       try {
