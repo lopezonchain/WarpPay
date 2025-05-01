@@ -61,10 +61,8 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
   // Preload all data once
   useEffect(() => {
     (async () => {
-      await sdk.actions.ready();
-  
       const context = (await sdk.context) as Context.FrameContext;
-      setModalMessage(context.toString());
+
       setFid(context.user.fid);
 
       try {

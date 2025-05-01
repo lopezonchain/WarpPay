@@ -29,6 +29,7 @@ import HistoryScreen from "./components/HistoryScreen";
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
+import { sdk } from '@farcaster/frame-sdk';
 
 import {
   mainnet, arbitrum, optimism, polygon, avalanche, fantom, gnosis, celo, base, abstract, aurora, bsc, dogechain,
@@ -235,6 +236,14 @@ export default function Page(): JSX.Element {
   useEffect(() => {
     if (!isFrameReady) setFrameReady();
   }, [isFrameReady, setFrameReady]);
+
+  useEffect(() => {
+      // (Opcional) Si tu SDK de Farcaster necesita inicializarse:
+      (async () => {
+        await sdk.actions.ready({ disableNativeGestures: true });
+      })();
+    }, [isFrameReady]);
+  
 
   useEffect(() => {
     if (!triedAutoConnect.current && !address && connectors.length) {
