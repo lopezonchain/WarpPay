@@ -40,97 +40,91 @@ export interface PaginatedUsers {
 }
 
 // src/services/warpcastService.ts
+
 export class WarpcastService {
-    private baseUrl = 'https://api.warpcast.com';
+    // Apuntamos al proxy interno de Next.js para evitar CORS
+    private baseUrl = '/api/warpcast';
   
     private async fetchPage<T>(
       path: string,
       params: Record<string, string | number | undefined>,
     ): Promise<T> {
-      const url = new URL(this.baseUrl+"/v2" + path);
-      Object.entries(params).forEach(
-        ([k, v]) => v != null && url.searchParams.append(k, String(v))
-      );
+      const url = new URL(this.baseUrl + path, window.location.href);
+      Object.entries(params).forEach(([k, v]) => {
+        if (v != null) url.searchParams.append(k, String(v));
+      });
       const res = await fetch(url.toString());
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       return res.json() as Promise<T>;
     }
   
-    /** Todos tus seguidores, paginando via result.next.cursor */
+    /** Obtiene todos tus followers paginando hasta que no haya más cursor */
     async getFollowers(fid: number): Promise<WarpcastUser[]> {
-        return this._collectAllPages((cursor) =>
-          this.fetchPage<{
-            result: { users: WarpcastUser[] };
-            next?: { cursor: string };
-          }>('/followers', { fid, cursor })
-            .then(d => ({
-              users: d.result.users,
-              nextCursor: d.next?.cursor   // <— aquí, no en d.result.next
-            }))
-        );
-      }
-    
-      /** Todos a quienes sigues, capturando leastInteracted solo en la primera página */
-      async getFollowing(fid: number): Promise<{
-        users: WarpcastUser[];
-        leastInteracted: { count: number; users: WarpcastUser[] };
-      }> {
-        let leastInteracted = { count: 0, users: [] as WarpcastUser[] };
-    
-        const users = await this._collectAllPages((cursor) =>
-          this.fetchPage<{
-            result: {
-              users: WarpcastUser[];
-              leastInteractedWith?: { count: number; users: WarpcastUser[] };
-            };
-            next?: { cursor: string };
-          }>('/following', { fid, cursor })
-            .then(d => {
-              // Sólo en la primera página guardamos el leastInteractedWith
-              if (!leastInteracted.users.length && d.result.leastInteractedWith) {
-                leastInteracted = d.result.leastInteractedWith;
-              }
-              return {
-                users: d.result.users,
-                nextCursor: d.next?.cursor  // <— aquí también
-              };
-            })
-        );
-    
-        return { users, leastInteracted };
-      }
-      
-      async getPrimaryAddresses(
-        fids: number[],
-        protocol: 'ethereum' | 'solana' = 'ethereum'
-      ): Promise<PrimaryAddressResult[]> {
-        // Construye la URL directamente sobre la raíz, sin "/v2"
-        const url = new URL(`${this.baseUrl}/fc/primary-addresses`);
-        url.searchParams.append('fids', fids.join(','));
-        url.searchParams.append('protocol', protocol);
-      
-        const res = await fetch(url.toString());
-        if (!res.ok) throw new Error(`API error: ${res.status}`);
-        const json = (await res.json()) as { result: { addresses: PrimaryAddressResult[] } };
-        return json.result.addresses;
-      }
-      
-    
-      private async _collectAllPages(
-        fetchPage: (cursor?: string) => Promise<{
-          users: WarpcastUser[];
-          nextCursor?: string;
-        }>
-      ): Promise<WarpcastUser[]> {
-        const all: WarpcastUser[] = [];
-        let cursor: string | undefined = undefined;
-        do {
-          const { users, nextCursor } = await fetchPage(cursor);
-          all.push(...users);
-          cursor = nextCursor;
-        } while (cursor);
-        return all;
-      }
+      return this._collectAllPages(cursor =>
+        this.fetchPage<{
+          result: { users: WarpcastUser[] };
+          next?: { cursor: string };
+        }>('/v2/followers', { fid, cursor }).then(d => ({
+          users: d.result.users,
+          nextCursor: d.next?.cursor
+        }))
+      );
     }
-    
   
+    /** Obtiene todos a quienes sigues + leastInteracted sólo de la primera página */
+    async getFollowing(fid: number): Promise<{
+      users: WarpcastUser[];
+      leastInteracted: { count: number; users: WarpcastUser[] };
+    }> {
+      let leastInteracted = { count: 0, users: [] as WarpcastUser[] };
+  
+      const users = await this._collectAllPages(cursor =>
+        this.fetchPage<{
+          result: {
+            users: WarpcastUser[];
+            leastInteractedWith?: { count: number; users: WarpcastUser[] };
+          };
+          next?: { cursor: string };
+        }>('/v2/following', { fid, cursor }).then(d => {
+          if (!leastInteracted.users.length && d.result.leastInteractedWith) {
+            leastInteracted = d.result.leastInteractedWith;
+          }
+          return {
+            users: d.result.users,
+            nextCursor: d.next?.cursor
+          };
+        })
+      );
+  
+      return { users, leastInteracted };
+    }
+  
+    /** Obtiene las wallets primarias de un listado de FIDs */
+    async getPrimaryAddresses(
+      fids: number[],
+      protocol: 'ethereum' | 'solana' = 'ethereum'
+    ): Promise<PrimaryAddressResult[]> {
+      // Apunta al proxy interno para evitar CORS
+      const url = new URL(`${this.baseUrl}/fc/primary-addresses`, window.location.href);
+      url.searchParams.append('fids', fids.join(','));
+      url.searchParams.append('protocol', protocol);
+      const res = await fetch(url.toString());
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      const json = (await res.json()) as { result: { addresses: PrimaryAddressResult[] } };
+      return json.result.addresses;
+    }
+  
+    /** Helper: recorre todas las páginas hasta que nextCursor sea undefined */
+    private async _collectAllPages(
+      fetchPage: (cursor?: string) => Promise<{ users: WarpcastUser[]; nextCursor?: string }>
+    ): Promise<WarpcastUser[]> {
+      const all: WarpcastUser[] = [];
+      let cursor: string | undefined = undefined;
+      do {
+        const { users, nextCursor } = await fetchPage(cursor);
+        all.push(...users);
+        cursor = nextCursor;
+      } while (cursor);
+      return all;
+    }
+  }
