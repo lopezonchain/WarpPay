@@ -104,7 +104,7 @@ export class WarpcastService {
       fids: number[],
       protocol: 'ethereum' | 'solana' = 'ethereum'
     ): Promise<PrimaryAddressResult[]> {
-      // Apunta al proxy interno para evitar CORS
+
       const url = new URL(`${this.baseUrl}/fc/primary-addresses`, window.location.href);
       url.searchParams.append('fids', fids.join(','));
       url.searchParams.append('protocol', protocol);
