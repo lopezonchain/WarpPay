@@ -9,6 +9,7 @@ import { resolveEnsName } from "../services/ensResolver";
 import { createAirdrop } from "../services/contractService";
 import { parseEther, parseUnits } from "viem";
 import { PrimaryAddressResult, WarpcastService, WarpcastUser } from "../services/warpcastService";
+import sdk from "@farcaster/frame-sdk";
 
 const warpcast = new WarpcastService();
 
@@ -54,9 +55,20 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
   const [csvText, setCsvText] = useState("");
   const [modalMessage, setModalMessage] = useState<string | null>(null);
 
+  const [fid, setFid] = useState<number | null>(null);
+
+
   // Preload all data once
   useEffect(() => {
     (async () => {
+      // 1) Indica al host que estás listo y desbloquea el contexto
+      await sdk.actions.ready();
+
+      // 2) Ahora sdk.context está poblado
+      const context = sdk.context;
+      console.log('Farcaster context:', context);
+      setFid(context.user.fid);
+
       try {
         const [followingRes, followersRes] = await Promise.all([
           warpcast.getFollowing(802090),
@@ -69,7 +81,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
         });
       } catch (err) {
         console.error(err);
-        setModalMessage("Error cargando datos");
+        setModalMessage("Error loading data");
       }
     })();
   }, []);
