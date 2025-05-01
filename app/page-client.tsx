@@ -312,21 +312,6 @@ export default function Page(): JSX.Element {
       <div className="w-full max-w-md mx-auto px-4 py-3 min-h-screen">
         <header className="flex justify-between items-center mb-3 h-11">
           <div className="flex items-center justify-between space-x-2 w-full">
-            <Wallet className="z-10">
-              <ConnectWallet>
-                <Name className="text-inherit" />
-              </ConnectWallet>
-              <WalletDropdown>
-                <Identity address={address} chain={selectedChain} className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-                  <Avatar address={address} chain={selectedChain} />
-                  <Name address={address} chain={selectedChain} />
-                  <Address address={address} />
-                  <EthBalance address={address} />
-                </Identity>
-                <WalletDropdownDisconnect />
-              </WalletDropdown>
-            </Wallet>
-
             {address && (
               <Listbox value={selectedChain.id} onChange={(id: number) => handleChainChange(id)}>
                 <div className="relative w-48 text-base">
@@ -383,8 +368,22 @@ export default function Page(): JSX.Element {
                   </Transition>
                 </div>
               </Listbox>
-
             )}
+
+            <Wallet className="z-10">
+              <ConnectWallet>
+                <Name className="text-inherit" />
+              </ConnectWallet>
+              <WalletDropdown>
+                <Identity address={address} chain={selectedChain} className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+                  <Avatar address={address} chain={selectedChain} />
+                  <Name address={address} chain={selectedChain} />
+                  <Address address={address} />
+                  <EthBalance address={address} />
+                </Identity>
+                <WalletDropdownDisconnect />
+              </WalletDropdown>
+            </Wallet>
 
           </div>
           <div>{saveFrameButton}</div>
