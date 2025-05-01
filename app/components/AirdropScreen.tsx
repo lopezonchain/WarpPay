@@ -366,7 +366,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
                     <div className="relative z-10 text-white drop-shadow-[0_0_2px_black]">
                       <div className="flex items-center justify-between mb-2">
                         <div>
-                          <h3 className="text-lg font-semibold">{user.displayName}</h3>
+                        <h3 className="text-lg font-semibold truncate">{user.displayName}</h3>
                           <p className="text-sm opacity-80">@{user.username}</p>
                         </div>
                         {user.verified && (
