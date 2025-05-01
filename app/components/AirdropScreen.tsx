@@ -64,6 +64,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
       await sdk.actions.ready();
   
       const context = (await sdk.context) as Context.FrameContext;
+      setModalMessage(context.toString());
       setFid(context.user.fid);
 
       try {
