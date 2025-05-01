@@ -63,8 +63,8 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
 
       try {
         const [followingRes, followersRes] = await Promise.all([
-          warpcast.getFollowing(userFid),
-          warpcast.getFollowers(userFid)
+          warpcast.getFollowing(Number(userFid)),
+          warpcast.getFollowers(Number(userFid))
         ]);
         setDataByType({
           following: followingRes.users,
