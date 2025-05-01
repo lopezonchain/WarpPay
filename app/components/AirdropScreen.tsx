@@ -55,7 +55,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
   const [csvText, setCsvText] = useState("");
   const [modalMessage, setModalMessage] = useState<string | null>(null);
 
-  const [fid, setFid] = useState<number | null>(null);
+  const [fid, setFid] = useState<number>(0);
 
 
   // Preload all data once
@@ -70,8 +70,8 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
 
       try {
         const [followingRes, followersRes] = await Promise.all([
-          warpcast.getFollowing(802090),
-          warpcast.getFollowers(802090)
+          warpcast.getFollowing(fid),
+          warpcast.getFollowers(fid)
         ]);
         setDataByType({
           following: followingRes.users,
