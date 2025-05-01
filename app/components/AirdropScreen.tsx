@@ -81,7 +81,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
         });
       } catch (err) {
         console.error(err);
-        setModalMessage("Error loading data");
+        //setModalMessage("Error loading data");
       }
     })();
   }, []);
