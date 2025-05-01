@@ -347,7 +347,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               {filteredList.map(user => {
                 const isSelected = selectedFids.includes(user.fid);
                 return (
