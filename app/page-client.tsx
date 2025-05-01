@@ -235,15 +235,10 @@ export default function Page(): JSX.Element {
 
   useEffect(() => {
     if (!isFrameReady) setFrameReady();
+    (async () => {
+      await sdk.actions.ready({ disableNativeGestures: true });
+    })();
   }, [isFrameReady, setFrameReady]);
-
-  useEffect(() => {
-      // (Opcional) Si tu SDK de Farcaster necesita inicializarse:
-      (async () => {
-        await sdk.actions.ready({ disableNativeGestures: true });
-      })();
-    }, [isFrameReady]);
-  
 
   useEffect(() => {
     if (!triedAutoConnect.current && !address && connectors.length) {

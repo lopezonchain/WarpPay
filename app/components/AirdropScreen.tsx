@@ -62,6 +62,10 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
   useEffect(() => {
     (async () => {
       const context = (await sdk.context) as Context.FrameContext;
+      // Formateamos el objeto como JSON con indentación de 2 espacios
+      const pretty = JSON.stringify(context.user, null, 2);
+      // Y lo mostramos en el modal
+      setModalMessage(pretty);
 
       setFid(context.user.fid);
 
