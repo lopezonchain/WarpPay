@@ -1,4 +1,3 @@
-// src/components/AirdropScreen.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -9,20 +8,17 @@ import { useWalletClient, usePublicClient } from "wagmi";
 import { resolveEnsName } from "../services/ensResolver";
 import { createAirdrop } from "../services/contractService";
 import { parseEther, parseUnits } from "viem";
+import { PrimaryAddressResult, WarpcastService, WarpcastUser } from "../services/warpcastService";
+
+const warpcast = new WarpcastService();
+
+type Mode = "recommended" | "manual" | "csv";
+type RecType = "following" | "followers" | "least_interacted";
 
 interface AirdropScreenProps {
   address?: `0x${string}`;
   onBack: () => void;
 }
-
-// Lista de recomendados de ejemplo
-const recommendedList = [
-  { label: "Alice", address: "alice.eth" },
-  { label: "Bob", address: "bob.eth" },
-  { label: "Carol", address: "carol.eth" },
-];
-
-type Mode = "recommended" | "manual" | "csv";
 
 const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
   const { data: walletClient } = useWalletClient();
@@ -30,56 +26,99 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
   const [chainId, setChainId] = useState<number>(0);
 
   useEffect(() => {
-    publicClient?.getChainId().then(id => setChainId(id));
+    publicClient?.getChainId().then((id) => setChainId(id));
   }, [publicClient]);
 
-  // --- State ---
-  const [mode, setMode] = useState<Mode>("csv");
+  // General state
+  const [mode, setMode] = useState<Mode>("recommended");
   const [useSameAmount, setUseSameAmount] = useState(true);
-
   const [tokenOption, setTokenOption] = useState<TokenOption>("ETH");
   const [contractAddress, setContractAddress] = useState("");
-
-  // recomendado:
-  const [amountPerRecipient, setAmountPerRecipient] = useState("");
-
-  // manual:
-  const [manualRows, setManualRows] = useState<{ addr: string; amt: string }[]>([
-    { addr: "", amt: "" },
-  ]);
-
-  // csv:
-  const [csvText, setCsvText] = useState("");
-
-  const [selectedRecs, setSelectedRecs] = useState<string[]>([]);
-  const [modalMessage, setModalMessage] = useState<string | null>(null);
-
-  // calcular tokenAddress o null para ETH
   const tokenAddress = tokenOption === "ETH" ? null : (contractAddress as `0x${string}`);
 
-  // Helper para parsear cada cantidad según token
-  async function parseAmount(amt: string) {
-    if (tokenOption === "ETH") {
-      return parseEther(amt);
-    } else {
-      const decimals = (await publicClient?.readContract({
-        address: tokenAddress!,
-        abi: [
-          {
-            type: "function",
-            name: "decimals",
-            stateMutability: "view",
-            inputs: [],
-            outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
-          },
-        ],
-        functionName: "decimals",
-      })) as number;
-      return parseUnits(amt, decimals);
+  // Recommended mode: data and global selection
+  const [recType, setRecType] = useState<RecType>("following");
+  const [dataByType, setDataByType] = useState<Record<RecType, WarpcastUser[]>>({
+    following: [],
+    followers: [],
+    least_interacted: []
+  });
+  const [selectedFids, setSelectedFids] = useState<number[]>([]);
+  const [autoCount, setAutoCount] = useState<number>(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [minFollowers, setMinFollowers] = useState<number>(0);
+
+  // Other modes
+  const [amountPerRecipient, setAmountPerRecipient] = useState("");
+  const [manualRows, setManualRows] = useState<{ addr: string; amt: string }[]>([{ addr: "", amt: "" }]);
+  const [csvText, setCsvText] = useState("");
+  const [modalMessage, setModalMessage] = useState<string | null>(null);
+
+  // Preload all data once
+  useEffect(() => {
+    (async () => {
+      try {
+        const [followingRes, followersRes] = await Promise.all([
+          warpcast.getFollowing(802090),
+          warpcast.getFollowers(802090)
+        ]);
+        setDataByType({
+          following: followingRes.users,
+          followers: followersRes,
+          least_interacted: followingRes.leastInteracted.users
+        });
+      } catch (err) {
+        console.error(err);
+        setModalMessage("Error cargando datos");
+      }
+    })();
+  }, []);
+
+  // Derived and filtered list
+  const recList = dataByType[recType] || [];
+  const filteredList = recList
+    .filter(u => {
+      const term = searchTerm.trim().toLowerCase();
+      const name = (u.displayName ?? "").toLowerCase();
+      const user = (u.username ?? "").toLowerCase();
+      return name.includes(term) || user.includes(term);
+    })
+    .filter(u => u.followerCount >= minFollowers);
+
+  // Selection handlers (global)
+  const toggleSelect = (fid: number) => {
+    setSelectedFids(prev =>
+      prev.includes(fid) ? prev.filter(id => id !== fid) : [...prev, fid]
+    );
+  };
+  const handleAutoSelect = () => {
+    const slice = filteredList.slice(0, autoCount).map(u => u.fid);
+    setSelectedFids(slice);
+  };
+
+  const handleRandomSelect = () => {
+    const pool = [...filteredList];
+    // barajamos
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
     }
+    setSelectedFids(pool.slice(0, autoCount).map(u => u.fid));
+  };
+
+
+  // Amount parser
+  async function parseAmount(amt: string) {
+    if (tokenOption === "ETH") return parseEther(amt);
+    const decimals = (await publicClient?.readContract({
+      address: tokenAddress!,
+      abi: [{ type: "function", name: "decimals", stateMutability: "view", inputs: [], outputs: [{ internalType: "uint8", name: "", type: "uint8" }] }],
+      functionName: "decimals",
+    })) as number;
+    return parseUnits(amt, decimals);
   }
 
-  // Manejador principal de airdrop
+  // Airdrop handler
   const handleAirdrop = async () => {
     if (!walletClient || !address) {
       setModalMessage("Please connect your wallet");
@@ -95,14 +134,31 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
           setModalMessage("Enter an amount per recipient");
           return;
         }
-        for (const rec of selectedRecs) {
-          const resolved = rec.startsWith("0x")
-            ? rec as `0x${string}`
-            : await resolveEnsName(rec);
-          recipients.push(resolved);
-          values.push(await parseAmount(amountPerRecipient));
+
+        // 1) Obtenemos las direcciones primarias de todos los FID seleccionados
+        let primaryResults: PrimaryAddressResult[];
+        try {
+          primaryResults = await warpcast.getPrimaryAddresses(selectedFids);
+        } catch (e) {
+          console.error(e);
+          setModalMessage("Error fetching primary addresses");
+          return;
         }
 
+        // 2) Construimos recipients y values sólo con los que tuvieron éxito
+        for (const { fid, success, address } of primaryResults) {
+          if (success && address?.address) {
+            recipients.push(address.address as `0x${string}`);
+            values.push(await parseAmount(amountPerRecipient));
+          } else {
+            console.warn(`No primary address for fid ${fid}`);
+          }
+        }
+
+        if (recipients.length === 0) {
+          setModalMessage("No valid wallet addresses found");
+          return;
+        }
       } else if (mode === "manual") {
         if (useSameAmount && !amountPerRecipient) {
           setModalMessage("Enter the common amount");
@@ -110,68 +166,48 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
         }
         for (const { addr, amt } of manualRows) {
           if (!addr) continue;
-          const resolved = addr.startsWith("0x")
-            ? addr as `0x${string}`
-            : await resolveEnsName(addr);
-          const amountString = useSameAmount ? amountPerRecipient : amt;
-          if (!amountString) continue;
+          const resolved = addr.startsWith("0x") ? (addr as `0x${string}`) : await resolveEnsName(addr);
+          const amountStr = useSameAmount ? amountPerRecipient : amt;
+          if (!amountStr) continue;
           recipients.push(resolved);
-          values.push(await parseAmount(amountString));
+          values.push(await parseAmount(amountStr));
         }
-
       } else {
-        // CSV mode
         if (useSameAmount && !amountPerRecipient) {
           setModalMessage("Enter the common amount");
           return;
         }
         for (const line of csvText.split(/\r?\n/)) {
           if (!line.trim()) continue;
-          const parts = line.split(",");
-          const addr = parts[0].trim();
-          const amt = useSameAmount
-            ? amountPerRecipient
-            : (parts[1]?.trim() ?? "");
+          const [addrPart, amtPart] = line.split(",");
+          const addr = addrPart.trim();
+          const amt = useSameAmount ? amountPerRecipient : (amtPart?.trim() ?? "");
           if (!addr || !amt) continue;
-          const resolved = addr.startsWith("0x")
-            ? addr as `0x${string}`
-            : await resolveEnsName(addr);
+          const resolved = addr.startsWith("0x") ? (addr as `0x${string}`) : await resolveEnsName(addr);
           recipients.push(resolved);
           values.push(await parseAmount(amt));
         }
       }
 
-      if (recipients.length === 0) {
+      if (!recipients.length) {
         setModalMessage("No valid recipients found");
         return;
       }
-
       setModalMessage("Multisending…");
-      const tx = await createAirdrop(
-        walletClient,
-        publicClient,
-        tokenAddress ?? null,
-        recipients,
-        values
-      );
+      const tx = await createAirdrop(walletClient, publicClient, tokenAddress, recipients, values);
       setModalMessage(`Airdrop TX submitted: ${tx.hash}`);
     } catch (err) {
       setModalMessage(`Error: ${(err as Error).message}`);
     }
   };
 
+  // Non-Base notice
   if (chainId && chainId !== 8453) {
     return (
-      <div className="p-4 text-white bg-[#0f0d14] flex flex-col items-end ">
-        {/* Back */}
-        <button
-          onClick={onBack}
-          className="mb-4 flex items-center justify-end text-purple-400 text-lg px-4 py-2 bg-[#1a1725] rounded-lg max-w-[200px]"
-        >
+      <div className="p-4 text-white bg-[#0f0d14] flex flex-col">
+        <button onClick={onBack} className="mb-4 flex items-center justify-center text-purple-400 text-lg px-4 py-2 bg-[#1a1725] rounded-lg max-w-[200px]">
           <FiArrowLeft className="w-6 h-6 mr-2" /> Back
         </button>
-    
-        {/* Título centrado */}
         <h2 className="text-2xl font-bold mb-6 mx-auto">Airdrop</h2>
         <div className="p-4 text-white bg-[#0f0d14] min-h-screen flex items-start justify-center">
           Only working on Base... yet! Send your suggestions
@@ -180,21 +216,15 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
     );
   }
 
+  // Main render
   return (
-    <div className="p-4 text-white bg-[#0f0d14] min-h-screen flex flex-col items-end ">
-      {/* Back */}
-      <button
-        onClick={onBack}
-        className="mb-4 flex items-center justify-end text-purple-400 text-lg px-4 py-2 bg-[#1a1725] rounded-lg max-w-[200px]"
-      >
+    <div className="p-4 text-white bg-[#0f0d14] flex flex-col">
+      <button onClick={onBack} className="mb-4 flex items-center justify-center text-purple-400 text-lg px-4 py-2 bg-[#1a1725] rounded-lg max-w-[200px]">
         <FiArrowLeft className="w-6 h-6 mr-2" /> Back
       </button>
-  
-      {/* Título centrado */}
       <h2 className="text-2xl font-bold mb-6 mx-auto">Airdrop</h2>
-  
-      {/* Token selector */}
-      <div className="space-y-4 flex-2 w-full">
+
+      <div className="space-y-4 w-full">
         <TokenSelector
           selected={tokenOption}
           onSelect={setTokenOption}
@@ -204,72 +234,164 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
         />
       </div>
 
-      {/* Mode tabs */}
-      <div className="flex space-x-2 mt-4 mb-6 ">
-        {([/*"recommended", */"csv", "manual"] as Mode[]).map((m) => (
+      <div className="flex space-x-2 mt-4 mb-6 justify-center items-center">
+        {(["recommended", "csv", "manual"] as Mode[]).map(m => (
           <button
             key={m}
             onClick={() => setMode(m)}
-            className={`px-4 py-2 rounded-full text-sm font-medium ${mode === m
-              ? "bg-purple-600 text-white"
-              : "bg-[#1a1725] text-gray-300 hover:bg-[#2a2438]"
-              }`}
+            className={`px-4 py-2 rounded-full text-sm font-medium ${mode === m ? "bg-purple-600 text-white" : "bg-[#1a1725] text-gray-300 hover:bg-[#2a2438]"}`}
           >
-            {m === "recommended"
-              ? "Recommended"
-              : m === "manual"
-                ? "Manual"
-                : "Paste CSV"}
+            {m === "recommended" ? "Recommended" : m === "manual" ? "Manual" : "CSV"}
           </button>
         ))}
       </div>
 
-      {/* Panels */}
       <div className="space-y-4 flex flex-col items-end w-full">
-        {/* Recommended */}
         {mode === "recommended" && (
           <>
             <input
               type="number"
-              placeholder="Amount per recipient"
-              className="w-full p-3 rounded-lg bg-[#1a1725] text-white"
+              placeholder="Amount for each recipient"
+              className="w-full p-3 rounded-lg bg-[#1a1725] text-white mb-2"
               value={amountPerRecipient}
-              onChange={(e) => setAmountPerRecipient(e.target.value)}
+              onChange={e => setAmountPerRecipient(e.target.value)}
             />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {recommendedList.map(({ label, address: addr }) => (
-                <label
-                  key={addr}
-                  className="flex items-center space-x-2 bg-[#1a1725] p-2 rounded-lg cursor-pointer"
+
+            {mode == 'recommended' && (
+              <button
+                onClick={handleAirdrop}
+                className="w-full mb-2 py-4 rounded-2xl mt-4 font-bold bg-purple-600 hover:bg-purple-700 text-lg"
+              >
+                Send Airdrop
+              </button>
+            )}
+            <div className="flex space-x-2 mb-2">
+              {(["following", "followers", "least_interacted"] as RecType[]).map(type => (
+                <button
+                  key={type}
+                  onClick={() => setRecType(type)}
+                  className={`px-3 py-1 rounded-lg text-sm ${recType === type ? "bg-purple-600 text-white" : "bg-[#1a1725] text-gray-300"}`}
                 >
-                  <input
-                    type="checkbox"
-                    checked={selectedRecs.includes(addr)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedRecs((s) => [...s, addr]);
-                      } else {
-                        setSelectedRecs((s) => s.filter((x) => x !== addr));
-                      }
-                    }}
-                  />
-                  <span className="text-white">{label}</span>
-                  <span className="text-gray-400 text-xs">{addr}</span>
-                </label>
+                  {type === "following"
+                    ? "Following"
+                    : type === "followers"
+                      ? "Followers"
+                      : "Least Interacted"}
+                </button>
               ))}
+            </div>
+
+            <div className="flex flex-col">
+              {/* Filtro de seguidores */}
+              <div className="flex flex-col">
+                <label htmlFor="minFollowers" className="mb-1 text-sm text-gray-400">
+                  Min Followers
+                </label>
+                <input
+                  id="minFollowers"
+                  type="number"
+                  min={0}
+                  placeholder="0"
+                  value={minFollowers}
+                  onChange={e => setMinFollowers(Number(e.target.value))}
+                  className="w-full p-2 rounded-lg bg-[#1a1725] text-white"
+                />
+              </div>
+
+              {/* Auto-select */}
+              <div className="flex flex-col">
+                <label htmlFor="autoCount" className="mb-1 text-sm text-gray-400">
+                  Auto-select
+                </label>
+                <div className="flex">
+                  <input
+                    id="autoCount"
+                    type="number"
+                    min={1}
+                    value={autoCount}
+                    onChange={e => setAutoCount(Number(e.target.value))}
+                    className="flex-1 p-2 rounded-l-lg bg-[#1a1725] text-white"
+                  />
+                  <button
+                    onClick={handleAutoSelect}
+                    className="px-4 py-2 bg-purple-600 text-sm font-medium"
+                  >
+                    Select first
+                  </button>
+                  <button
+                    onClick={handleRandomSelect}
+                    className="px-4 py-2 bg-purple-600 rounded-r-lg text-sm font-medium"
+                  >
+                    Select Random
+                  </button>
+                </div>
+              </div>
+
+              {/* Buscador */}
+              <div className="flex flex-col">
+                <label htmlFor="searchTerm" className="mb-1 text-sm text-gray-400">
+                  Search
+                </label>
+                <input
+                  id="searchTerm"
+                  type="text"
+                  placeholder="Fc name or username"
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  className="w-full p-2 rounded-lg bg-[#1a1725] text-white"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {filteredList.map(user => {
+                const isSelected = selectedFids.includes(user.fid);
+                return (
+                  <label
+                    key={user.fid}
+                    className={`relative flex flex-col justify-end p-4 h-32 rounded-3xl cursor-pointer bg-cover bg-center shadow-lg transition-transform transform border-2 ${isSelected ? 'border-purple-500 scale-105' : 'border-transparent'} hover:scale-[1.02]`}
+                    style={{ backgroundImage: `url(${user.pfp?.url})` }}
+                  >
+                    <input
+                      type="checkbox"
+                      className="absolute inset-0 w-full h-full opacity-0 peer cursor-pointer rounded-3xl"
+                      checked={isSelected}
+                      onChange={() => toggleSelect(user.fid)}
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-50 rounded-3xl pointer-events-none" />
+                    <div className="relative z-10 text-white drop-shadow-[0_0_2px_black]">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <h3 className="text-lg font-semibold">{user.displayName}</h3>
+                          <p className="text-sm opacity-80">@{user.username}</p>
+                        </div>
+                        {user.verified && (
+                          <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 0l3 6 6 .5-4.5 4 1 6-5.5-3-5.5 3 1-6L1 6.5 7 6z" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-2 text-xs opacity-90">
+                        <span>{user.followerCount} followers</span>
+                        <span>{user.followingCount} following</span>
+                      </div>
+                    </div>
+                    <div className="absolute top-3 right-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  </label>
+                );
+              })}
             </div>
           </>
         )}
 
-        {/* Manual */}
         {mode === "manual" && (
           <>
             <label className="flex items-center space-x-2 mb-2">
-              <input
-                type="checkbox"
-                checked={useSameAmount}
-                onChange={() => setUseSameAmount(!useSameAmount)}
-              />
+              <input type="checkbox" checked={useSameAmount} onChange={() => setUseSameAmount(!useSameAmount)} />
               <span className="text-sm">Same amount for all</span>
             </label>
             {useSameAmount && (
@@ -278,9 +400,8 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
                 placeholder="Amount for each recipient"
                 className="w-full p-3 rounded-lg bg-[#1a1725] text-white mb-2"
                 value={amountPerRecipient}
-                onChange={(e) => setAmountPerRecipient(e.target.value)}
-              />
-            )}
+                onChange={e => setAmountPerRecipient(e.target.value)}
+              />)}
             {manualRows.map((row, i) => (
               <div key={i} className="flex space-x-2 mb-2 w-full">
                 <input
@@ -288,13 +409,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
                   placeholder="Address / ENS"
                   className="flex-1 p-2 rounded-lg bg-[#1a1725] text-white"
                   value={row.addr}
-                  onChange={(e) =>
-                    setManualRows((r) =>
-                      r.map((x, j) =>
-                        j === i ? { ...x, addr: e.target.value } : x
-                      )
-                    )
-                  }
+                  onChange={e => setManualRows(r => r.map((x, j) => j === i ? { ...x, addr: e.target.value } : x))}
                 />
                 {!useSameAmount && (
                   <input
@@ -302,37 +417,21 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
                     placeholder="Amount"
                     className="w-32 p-2 rounded-lg bg-[#1a1725] text-white"
                     value={row.amt}
-                    onChange={(e) =>
-                      setManualRows((r) =>
-                        r.map((x, j) =>
-                          j === i ? { ...x, amt: e.target.value } : x
-                        )
-                      )
-                    }
+                    onChange={e => setManualRows(r => r.map((x, j) => j === i ? { ...x, amt: e.target.value } : x))}
                   />
                 )}
               </div>
             ))}
-            <button
-              onClick={() =>
-                setManualRows((r) => [...r, { addr: "", amt: "" }])
-              }
-              className="mt-2 px-4 py-2 bg-purple-600 rounded-lg text-sm align-right"
-            >
+            <button onClick={() => setManualRows(r => [...r, { addr: "", amt: "" }])} className="mt-2 px-4 py-2 bg-purple-600 rounded-lg text-sm align-right">
               + Add Recipient
             </button>
           </>
         )}
 
-        {/* CSV */}
         {mode === "csv" && (
           <>
             <label className="flex items-center space-x-2 mb-2">
-              <input
-                type="checkbox"
-                checked={useSameAmount}
-                onChange={() => setUseSameAmount(!useSameAmount)}
-              />
+              <input type="checkbox" checked={useSameAmount} onChange={() => setUseSameAmount(!useSameAmount)} />
               <span className="text-sm">Same amount for all</span>
             </label>
             {useSameAmount && (
@@ -341,33 +440,28 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
                 placeholder="Amount for each recipient"
                 className="w-full p-3 rounded-lg bg-[#1a1725] text-white mb-2"
                 value={amountPerRecipient}
-                onChange={(e) => setAmountPerRecipient(e.target.value)}
-              />
-            )}
+                onChange={e => setAmountPerRecipient(e.target.value)}
+              />)}
             <textarea
-              placeholder={
-                useSameAmount
-                  ? "One recipient address or ens per line"
-                  : "recipient,amount per line"
-              }
+              placeholder={useSameAmount ? "One recipient address or ens per line" : "recipient,amount per line"}
               className="w-full h-40 p-3 rounded-lg bg-[#1a1725] text-white"
               value={csvText}
-              onChange={(e) => setCsvText(e.target.value)}
+              onChange={e => setCsvText(e.target.value)}
             />
           </>
         )}
       </div>
 
-      <button
-        onClick={handleAirdrop}
-        className="w-full py-4 rounded-2xl mt-4 font-bold bg-purple-600 hover:bg-purple-700 text-lg"
-      >
-        Send Airdrop
-      </button>
-
-      {modalMessage && (
-        <AlertModal message={modalMessage} onClose={() => setModalMessage(null)} />
+      {mode !== 'recommended' && (
+        <button
+          onClick={handleAirdrop}
+          className="w-full py-4 rounded-2xl mt-4 font-bold bg-purple-600 hover:bg-purple-700 text-lg"
+        >
+          Send Airdrop
+        </button>
       )}
+
+      {modalMessage && <AlertModal message={modalMessage} onClose={() => setModalMessage(null)} />}
     </div>
   );
 };

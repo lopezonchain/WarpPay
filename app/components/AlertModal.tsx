@@ -26,7 +26,7 @@ const AlertModal: React.FC<AlertModalProps> = ({ message, onClose }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
-      <div className="bg-gray-800 p-4 rounded-lg w-80">
+      <div className="bg-gray-800 p-4 rounded-lg w-full md:w-1/2 lg:w-1/3 mx-auto overflow-auto">
         <div className="text-white mb-4 text-center">{message}</div>
         <div
           className="h-2 bg-green-500 rounded"

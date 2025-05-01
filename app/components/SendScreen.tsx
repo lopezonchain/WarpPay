@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FiArrowLeft } from "react-icons/fi";
+import { FiArrowLeft, FiCompass } from "react-icons/fi";
 import AlertModal from "./AlertModal";
 import { sendTokens } from "../services/contractService";
 import { useWalletClient, usePublicClient, useAccount } from "wagmi";
@@ -32,6 +32,7 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
   const connectedWallet = useAccount();
 
   const searchParams = useSearchParams();
+  const isPayment = !!searchParams.get("wallet");
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
   const [selectedToken, setSelectedToken] = useState<TokenOption>("ETH");
@@ -100,12 +101,22 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
   };
 
   return (
-    <div className="p-4 text-white bg-[#0f0d14] flex flex-col items-end ">
+    <div className="p-4 text-white bg-[#0f0d14] flex flex-col">
       <button
         onClick={onBack}
-        className="mb-4 flex items-center justify-end text-purple-400 text-lg px-4 py-2 bg-[#1a1725] rounded-lg max-w-[200px]"
+        className="mb-4 flex items-center justify-center text-purple-400 text-lg px-4 py-2 bg-[#1a1725] rounded-lg max-w-[200px]"
       >
-        <FiArrowLeft className="w-6 h-6 mr-2" /> Back
+        {isPayment ? (
+          <>
+            <FiCompass className="w-6 h-6 mr-2" />
+            Explore
+          </>
+        ) : (
+          <>
+            <FiArrowLeft className="w-6 h-6 mr-2" />
+            Back
+          </>
+        )}
       </button>
 
       <h2 className="text-2xl font-bold mb-6 mx-auto">Send</h2>
