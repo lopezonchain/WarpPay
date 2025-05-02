@@ -45,7 +45,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
     least_interacted: []
   });
   const [selectedFids, setSelectedFids] = useState<number[]>([]);
-  const [autoCount, setAutoCount] = useState<number>(0);
+  const [autoCount, setAutoCount] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [minFollowers, setMinFollowers] = useState<number>(0);
 
@@ -264,7 +264,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
             {mode == 'recommended' && (
               <button
                 onClick={handleAirdrop}
-                className="w-full mb-2 py-4 rounded-2xl mt-4 font-bold bg-purple-600 hover:bg-purple-700 text-lg"
+                className="fixed bottom-2 left-1/4 w-full mb-2 py-4 rounded-2xl mt-4 font-bold bg-purple-600 hover:bg-purple-700 text-lg w-1/2"
               >
                 Send Airdrop
               </button>
@@ -302,7 +302,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
               </div>
 
               {/* Auto-select */}
-              <div className="flex flex-col w-full">
+              <div className="flex flex-col w-full mt-2">
                 <label htmlFor="autoCount" className="mb-1 text-sm text-gray-400">
                   Auto-select
                 </label>
@@ -320,19 +320,19 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
                     onClick={handleAutoSelect}
                     className="px-4 py-2 bg-purple-600 text-sm font-medium w-full sm:w-auto sm:rounded-none"
                   >
-                    Select first
+                    Select first {autoCount}
                   </button>
                   <button
                     onClick={handleRandomSelect}
                     className="px-4 py-2 bg-purple-600 text-sm font-medium w-full sm:w-auto sm:rounded-r-lg sm:rounded-l-none"
                   >
-                    Select Random
+                    Select {autoCount} randomly
                   </button>
                 </div>
               </div>
 
               {/* Buscador */}
-              <div className="flex flex-col w-full">
+              <div className="flex flex-col w-full mt-2">
                 <label htmlFor="searchTerm" className="mb-1 text-sm text-gray-400">
                   Search
                 </label>
@@ -353,7 +353,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
                 return (
                   <label
                     key={user.fid}
-                    className={`relative flex flex-col justify-end p-4 h-32 rounded-3xl cursor-pointer bg-cover bg-center shadow-lg transition-transform transform border-2 ${isSelected ? 'border-purple-500 scale-105' : 'border-transparent'} hover:scale-[1.02]`}
+                    className={`relative overflow-hidden flex flex-col justify-end p-4 h-32 rounded-3xl cursor-pointer bg-cover bg-center shadow-lg transition-transform transform border-2 ${isSelected ? 'border-purple-500 scale-105' : 'border-transparent'} hover:scale-[1.02]`}
                     style={{ backgroundImage: `url(${user.pfp?.url})` }}
                   >
                     <input
