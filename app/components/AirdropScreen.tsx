@@ -262,10 +262,19 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
             />
 
             {mode == 'recommended' && (
-              <button
-                onClick={handleAirdrop}
-                className="fixed bottom-2 left-1/4 w-full mb-2 py-4 rounded-2xl mt-4 font-bold bg-purple-600 hover:bg-purple-700 text-lg w-1/2"
-              >
+               <button
+               onClick={handleAirdrop}
+               className="
+                 fixed z-50            /* siempre encima */
+                 bottom-2                  /* 0.5rem desde arriba */
+                 left-1/2               /* posiciona el left en 50% */
+                 transform -translate-x-1/2 /* centra horizontalmente */
+                 w-11/12 sm:w-1/2       /* ancho responsivo */
+                 py-4 rounded-2xl mt-4  /* padding y bordes */
+                 font-bold bg-purple-600 hover:bg-purple-700
+                 text-lg
+               "
+             >
                 Send Airdrop
               </button>
             )}
