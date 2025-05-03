@@ -34,7 +34,7 @@ import { sdk } from '@farcaster/frame-sdk';
 import {
   mainnet, arbitrum, optimism, polygon, avalanche, fantom, gnosis, celo, base, abstract, aurora, bsc, dogechain,
   linea, metis, moonbeam, neonMainnet, polygonZkEvm, sonic, tron, zksync,
-  baseSepolia,
+  baseSepolia, monadTestnet
 } from "wagmi/chains";
 
 export type WarpView = "home" | "send" | "request" | "airdrop" | "history" | "scheduled";
@@ -42,6 +42,7 @@ export type WarpView = "home" | "send" | "request" | "airdrop" | "history" | "sc
 const chainOptions = [
   //{ label: "Sepolia", chain: baseSepolia },
   { label: "Base", chain: base },
+  { label: "Monad Testnet", chain: monadTestnet },
   { label: "Ethereum", chain: mainnet },
   { label: "Arbitrum", chain: arbitrum },
   { label: "Sonic", chain: sonic },

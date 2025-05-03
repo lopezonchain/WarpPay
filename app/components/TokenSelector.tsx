@@ -21,6 +21,7 @@ import {
   aurora,
   moonbeam,
   neonMainnet,
+  monadTestnet,
 } from "wagmi/chains";
 
 export type TokenOption = "ETH" | "USDC" | "CUSTOM";

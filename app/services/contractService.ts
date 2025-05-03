@@ -1,7 +1,5 @@
 // src/services/contractService.ts
 import contractAbi from "./contractAbi.json";
-import { createPublicClient, http } from "viem";
-import { mainnet } from "viem/chains";
 import { resolveEnsName } from "./ensResolver";
 
 export const erc20Abi = [
@@ -44,12 +42,6 @@ export const erc20Abi = [
     "type": "function"
   }
 ];
-
-// ENS‐only client on Mainnet
-const ensClient = createPublicClient({
-  chain: mainnet,
-  transport: http("https://eth.llamarpc.com"),
-});
 
 export interface Tx {
   summary: string;

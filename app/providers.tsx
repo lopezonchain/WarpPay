@@ -27,6 +27,7 @@ import {
   neonMainnet,
   Chain,
   baseSepolia,        // Neon EVM (Solana)
+  monadTestnet,
 } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MiniKitProvider } from "@coinbase/onchainkit/minikit";
@@ -55,7 +56,8 @@ type ChainType =
   | typeof aurora
   | typeof moonbeam
   | typeof neonMainnet
-  | typeof baseSepolia;
+  | typeof baseSepolia
+  | typeof monadTestnet;
 
 
 // 1️⃣ Crear QueryClient para React Query
@@ -85,7 +87,8 @@ const chains: [Chain, ...Chain[]] = [
   aurora,
   moonbeam,
   neonMainnet,
-  baseSepolia
+  baseSepolia,
+  monadTestnet,
 ];
 
 
