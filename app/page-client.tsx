@@ -414,7 +414,7 @@ export default function Page(): JSX.Element {
           {warpView === "send" && <SendScreen address={address} onBack={handleBack} />}
           {warpView === "request" && <RequestScreen address={address} onBack={handleBack} />}
           {warpView === "airdrop" && <AirdropScreen address={address} onBack={handleBack} />}
-          {warpView === "schedule" && <ScheduleScreen address={address} onBack={handleBack} />}
+          {warpView === "schedule" && <ScheduleScreen onBack={handleBack} />}
           
         </main>
       </div>
