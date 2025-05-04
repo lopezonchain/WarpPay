@@ -21,7 +21,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
       { icon: <FiSend />, label: "Send", desc: "Instantly send any currency to any wallet, ENS or Basename", action: "send", enabled: true, fee: 0 },
       { icon: <FiDollarSign />, label: "Request", desc: "Generate a payment request link that anyone can fulfill.", action: "request", enabled: true, fee: 0 },
       { icon: <FiGift />, label: "Airdrop", desc: "Distribute tokens to multiple addresses at once, saving time and gas fees.", action: "airdrop", enabled: true, fee: 2 },
-      { icon: <FiClock />, label: "Scheduled", desc: "Schedule one-time or recurring payments.", action: "scheduled", enabled: false, fee: 3 },
+      { icon: <FiClock />, label: "Scheduled", desc: "Schedule one-time or recurring payments.", action: "schedule", enabled: true, fee: 3 },
       { icon: <FiBookOpen />, label: "History", desc: "View your past payments.", action: "history", enabled: false, fee: 0 },
     ];
 
@@ -66,7 +66,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
             </div>
             <div className="text-xs text-gray-400 pl-8">{desc}</div>
             {/* Logo de red Base */}
-            {(action === "airdrop" || action === "scheduled") && (
+            {(action === "airdrop" || action === "schedule") && (
               <div>
                 <img
                   src="https://github.com/base/brand-kit/blob/main/logo/symbol/Base_Symbol_Blue.png?raw=true"

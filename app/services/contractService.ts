@@ -65,7 +65,7 @@ export interface ScheduledPayment {
 const WARPPAY_CONTRACT_BASE = process.env.NEXT_PUBLIC_WARPPAY_BASE_CONTRACT!;
 const WARPPAY_CONTRACT_MONAD = process.env.NEXT_PUBLIC_WARPPAY_MONAD_CONTRACT!;
 
-function getWarpPayContract(chainId: number): `0x${string}` {
+export function getWarpPayContract(chainId: number): `0x${string}` {
   switch (chainId) {
     case 8453:
       return WARPPAY_CONTRACT_BASE as `0x${string}`;
@@ -402,6 +402,7 @@ export async function getDuePayments(
  */
 export async function getPaymentsByStatus(
   walletClient: any,
+  publicClient: any,
   status: number,
   offset: number,
   limit: number
@@ -411,7 +412,7 @@ export async function getPaymentsByStatus(
   const chainId: number = walletClient.chain.id;
   const warpPayContract = getWarpPayContract(chainId);
 
-  const list = await walletClient.readContract({
+  const list = await publicClient.readContract({
     address: warpPayContract,
     abi: contractAbi,
     functionName: "getPaymentsByStatus",
