@@ -65,7 +65,7 @@ export interface ScheduledPayment {
 const WARPPAY_CONTRACT_BASE = process.env.NEXT_PUBLIC_WARPPAY_BASE_CONTRACT!;
 const WARPPAY_CONTRACT_MONAD = process.env.NEXT_PUBLIC_WARPPAY_MONAD_CONTRACT!;
 
-function getWarpPayContract(chainId: number): `0x${string}` {
+export function getWarpPayContract(chainId: number): `0x${string}` {
   switch (chainId) {
     case 8453:
       return WARPPAY_CONTRACT_BASE as `0x${string}`;
