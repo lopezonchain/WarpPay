@@ -1,4 +1,5 @@
 // src/services/contractService.ts
+import { Chain } from "viem";
 import contractAbi from "./contractAbi.json";
 import { resolveEnsName } from "./ensResolver";
 
@@ -426,7 +427,8 @@ export async function getPaymentsByStatus(
  * Fetch transaction history (Etherscan).
  */
 export async function fetchHistory(
-  address: string
+  address: string,
+  chain: Chain
 ): Promise<Tx[]> {
   const apiKey = process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY!;
   const url =
