@@ -62,7 +62,21 @@ export interface ScheduledPayment {
 }
 
 // Address of your WarpPay contract
-const WARPPAY_CONTRACT = process.env.NEXT_PUBLIC_WARPPAY_BASE_CONTRACT!;
+const WARPPAY_CONTRACT_BASE = process.env.NEXT_PUBLIC_WARPPAY_BASE_CONTRACT!;
+const WARPPAY_CONTRACT_MONAD = process.env.NEXT_PUBLIC_WARPPAY_MONAD_CONTRACT!;
+
+function getWarpPayContract(chainId: number): `0x${string}` {
+  switch (chainId) {
+    // Chain ID de Base testnet (por ejemplo, 84531)
+    case 84531:
+      return WARPPAY_CONTRACT_BASE as `0x${string}`;
+    // Chain ID de Monad testnet (por ejemplo, 1337)
+    case 1337:
+      return WARPPAY_CONTRACT_MONAD as `0x${string}`;
+    default:
+      throw new Error(`WarpPay no soportado en chainId ${chainId}`);
+  }
+}
 
 /**
  * Sends ETH or ERC-20 tokens using walletClient.
@@ -133,6 +147,9 @@ export async function createAirdrop(
 
   let txHash: string;
 
+  const chainId: number = walletClient.chain.id;
+  const warpPayContract = getWarpPayContract(chainId);
+
   if (tokenAddress) {
     // 1) Calcular neto total y fee
     const totalNet = values.reduce((acc, v) => Number(acc) + Number(v), 0);
@@ -143,7 +160,7 @@ export async function createAirdrop(
       address: tokenAddress,
       abi: erc20Abi,
       functionName: "approve",
-      args: [WARPPAY_CONTRACT, BigInt(totalNet) + totalFee],
+      args: [warpPayContract, BigInt(totalNet) + totalFee],
     });
 
     // 3) Esperar a que la aprobación sea confirmada
@@ -153,7 +170,7 @@ export async function createAirdrop(
 
     // 4) Llamar a multisendToken con los valores netos
     txHash = await walletClient.writeContract({
-      address: WARPPAY_CONTRACT,
+      address: warpPayContract,
       abi: contractAbi,
       functionName: "multisendToken",
       args: [tokenAddress, recipients, values],
@@ -163,7 +180,7 @@ export async function createAirdrop(
     const totalFee = (BigInt(totalNet) * BigInt(2)) /  BigInt(100);
 
     txHash = await walletClient.writeContract({
-      address: WARPPAY_CONTRACT,
+      address: warpPayContract,
       abi: contractAbi,
       functionName: "multisendEther",
       args: [recipients, values],
@@ -190,6 +207,9 @@ export async function schedulePayment(
 ): Promise<Tx> {
   if (!walletClient) throw new Error("No wallet client available");
 
+  const chainId: number = walletClient.chain.id;
+  const warpPayContract = getWarpPayContract(chainId);
+
   const token = tokenAddress ?? "0x0000000000000000000000000000000000000000";
   const overrides: any = {};
   if (token === "0x0000000000000000000000000000000000000000") {
@@ -197,7 +217,7 @@ export async function schedulePayment(
   }
 
   const txHash = await walletClient.writeContract({
-    address: WARPPAY_CONTRACT,
+    address: warpPayContract,
     abi: contractAbi,
     functionName: "schedulePayment",
     args: [recipient, value, token, BigInt(executeTime)],
@@ -231,8 +251,11 @@ export async function scheduleCyclicPayment(
     overrides.value = value * BigInt(repetitions);
   }
 
+  const chainId: number = walletClient.chain.id;
+  const warpPayContract = getWarpPayContract(chainId);
+
   const txHash = await walletClient.writeContract({
-    address: WARPPAY_CONTRACT,
+    address: warpPayContract,
     abi: contractAbi,
     functionName: "scheduleCyclicPayment",
     args: [
@@ -262,8 +285,11 @@ export async function cancelActivePayment(
 ): Promise<Tx> {
   if (!walletClient) throw new Error("No wallet client available");
 
+  const chainId: number = walletClient.chain.id;
+  const warpPayContract = getWarpPayContract(chainId);
+
   const txHash = await walletClient.writeContract({
-    address: WARPPAY_CONTRACT,
+    address: warpPayContract,
     abi: contractAbi,
     functionName: "cancelActivePayment",
     args: [paymentId],
@@ -285,8 +311,11 @@ export async function cancelCyclicPayment(
 ): Promise<Tx> {
   if (!walletClient) throw new Error("No wallet client available");
 
+  const chainId: number = walletClient.chain.id;
+  const warpPayContract = getWarpPayContract(chainId);
+
   const txHash = await walletClient.writeContract({
-    address: WARPPAY_CONTRACT,
+    address: warpPayContract,
     abi: contractAbi,
     functionName: "cancelCyclicPayment",
     args: [cyclicId],
@@ -308,8 +337,11 @@ export async function executeDuePaymentsBatch(
 ): Promise<Tx> {
   if (!walletClient) throw new Error("No wallet client available");
 
+  const chainId: number = walletClient.chain.id;
+  const warpPayContract = getWarpPayContract(chainId);
+
   const txHash = await walletClient.writeContract({
-    address: WARPPAY_CONTRACT,
+    address: warpPayContract,
     abi: contractAbi,
     functionName: "executeDuePaymentsBatch",
     args: [BigInt(limit)],
@@ -330,8 +362,11 @@ export async function executeSinglePayment(
 ): Promise<Tx> {
   if (!walletClient) throw new Error("No wallet client available");
 
+  const chainId: number = walletClient.chain.id;
+  const warpPayContract = getWarpPayContract(chainId);
+
   const txHash = await walletClient.writeContract({
-    address: WARPPAY_CONTRACT,
+    address: warpPayContract,
     abi: contractAbi,
     functionName: "executeSinglePayment",
     args: [],
@@ -352,8 +387,11 @@ export async function getDuePayments(
 ): Promise<{ indexes: bigint[]; overdueTimes: bigint[] }> {
   if (!walletClient) throw new Error("No wallet client available");
 
+  const chainId: number = walletClient.chain.id;
+  const warpPayContract = getWarpPayContract(chainId);
+
   const [indexes, overdueTimes] = await walletClient.readContract({
-    address: WARPPAY_CONTRACT,
+    address: warpPayContract,
     abi: contractAbi,
     functionName: "getDuePayments",
     args: [],
@@ -372,8 +410,11 @@ export async function getPaymentsByStatus(
 ): Promise<ScheduledPayment[]> {
   if (!walletClient) throw new Error("No wallet client available");
 
+  const chainId: number = walletClient.chain.id;
+  const warpPayContract = getWarpPayContract(chainId);
+
   const list = await walletClient.readContract({
-    address: WARPPAY_CONTRACT,
+    address: warpPayContract,
     abi: contractAbi,
     functionName: "getPaymentsByStatus",
     args: [status, BigInt(offset), BigInt(limit)],

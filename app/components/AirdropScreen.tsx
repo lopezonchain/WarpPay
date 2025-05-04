@@ -59,21 +59,23 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
   useEffect(() => {
     (async () => {
       const context = (await sdk.context) as Context.FrameContext;
-      const userFid = context.user.fid;
+      const userFid = context?.user.fid;
 
-      try {
-        const [followingRes, followersRes] = await Promise.all([
-          warpcast.getFollowing(Number(userFid)),
-          warpcast.getFollowers(Number(userFid))
-        ]);
-        setDataByType({
-          following: followingRes.users,
-          followers: followersRes,
-          least_interacted: followingRes.leastInteracted.users
-        });
-      } catch (err) {
-        console.error(err);
-        //setModalMessage("Error loading data");
+      if (userFid) {
+        try {
+          const [followingRes, followersRes] = await Promise.all([
+            warpcast.getFollowing(Number(userFid)),
+            warpcast.getFollowers(Number(userFid))
+          ]);
+          setDataByType({
+            following: followingRes.users,
+            followers: followersRes,
+            least_interacted: followingRes.leastInteracted.users
+          });
+        } catch (err) {
+          console.error(err);
+          //setModalMessage("Error loading data");
+        }
       }
     })();
   }, []);
@@ -206,7 +208,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
   };
 
   // Non-Base notice
-  if (chainId && chainId !== 8453) {
+  if (chainId && chainId !== 8453 && chainId !== 10143) {
     return (
       <div className="p-4 text-white bg-[#0f0d14] flex flex-col">
         <button onClick={onBack} className="mb-4 flex items-center justify-center text-purple-400 text-lg px-4 py-2 bg-[#1a1725] rounded-lg max-w-[200px]">
@@ -214,7 +216,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
         </button>
         <h2 className="text-2xl font-bold mb-6 mx-auto">Airdrop</h2>
         <div className="p-4 text-white bg-[#0f0d14] min-h-screen flex items-start justify-center">
-          Only working on Base... yet! Send your suggestions
+          Only working on Base and Monad Testnet... yet! Send your suggestions
         </div>
       </div>
     );
@@ -262,9 +264,9 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
             />
 
             {mode == 'recommended' && (
-               <button
-               onClick={handleAirdrop}
-               className="
+              <button
+                onClick={handleAirdrop}
+                className="
                  fixed z-50            /* siempre encima */
                  bottom-2                  /* 0.5rem desde arriba */
                  left-1/2               /* posiciona el left en 50% */
@@ -274,7 +276,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
                  font-bold bg-purple-600 hover:bg-purple-700
                  text-lg
                "
-             >
+              >
                 Send Airdrop
               </button>
             )}
@@ -356,48 +358,75 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              {filteredList.map(user => {
-                const isSelected = selectedFids.includes(user.fid);
-                return (
-                  <label
-                    key={user.fid}
-                    className={`relative overflow-hidden flex flex-col justify-end p-4 h-32 rounded-3xl cursor-pointer bg-cover bg-center shadow-lg transition-transform transform border-2 ${isSelected ? 'border-purple-500 scale-105' : 'border-transparent'} hover:scale-[1.02]`}
-                    style={{ backgroundImage: `url(${user.pfp?.url})` }}
-                  >
-                    <input
-                      type="checkbox"
-                      className="absolute inset-0 w-full h-full opacity-0 peer cursor-pointer rounded-3xl"
-                      checked={isSelected}
-                      onChange={() => toggleSelect(user.fid)}
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-50 rounded-3xl pointer-events-none" />
-                    <div className="relative z-10 text-white drop-shadow-[0_0_2px_black]">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                        <h3 className="text-lg font-semibold truncate">{user.displayName}</h3>
-                          <p className="text-sm opacity-80">@{user.username}</p>
+            {filteredList.length === 0 ? (
+              <p className="w-full text-center text-gray-500">
+                Open in Warpcast to get data
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                {filteredList.map(user => {
+                  const isSelected = selectedFids.includes(user.fid);
+                  return (
+                    <label
+                      key={user.fid}
+                      className={`relative overflow-hidden flex flex-col justify-end p-4 h-32 rounded-3xl cursor-pointer bg-cover bg-center shadow-lg transition-transform transform border-2 ${isSelected
+                          ? 'border-purple-500 scale-105'
+                          : 'border-transparent'
+                        } hover:scale-[1.02]`}
+                      style={{ backgroundImage: `url(${user.pfp?.url})` }}
+                    >
+                      <input
+                        type="checkbox"
+                        className="absolute inset-0 w-full h-full opacity-0 peer cursor-pointer rounded-3xl"
+                        checked={isSelected}
+                        onChange={() => toggleSelect(user.fid)}
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-50 rounded-3xl pointer-events-none" />
+                      <div className="relative z-10 text-white drop-shadow-[0_0_2px_black]">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h3 className="text-lg font-semibold truncate">
+                              {user.displayName}
+                            </h3>
+                            <p className="text-sm opacity-80">
+                              @{user.username}
+                            </p>
+                          </div>
+                          {user.verified && (
+                            <svg
+                              className="w-5 h-5 text-blue-400"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path d="M10 0l3 6 6 .5-4.5 4 1 6-5.5-3-5.5 3 1-6L1 6.5 7 6z" />
+                            </svg>
+                          )}
                         </div>
-                        {user.verified && (
-                          <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 0l3 6 6 .5-4.5 4 1 6-5.5-3-5.5 3 1-6L1 6.5 7 6z" />
-                          </svg>
-                        )}
+                        <div className="flex flex-wrap gap-2 text-xs opacity-90">
+                          <span>{user.followerCount} followers</span>
+                          <span>{user.followingCount} following</span>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-2 text-xs opacity-90">
-                        <span>{user.followerCount} followers</span>
-                        <span>{user.followingCount} following</span>
+                      <div className="absolute top-3 right-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity">
+                        <svg
+                          className="w-6 h-6"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
                       </div>
-                    </div>
-                    <div className="absolute top-3 right-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity">
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  </label>
-                );
-              })}
-            </div>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
           </>
         )}
 
