@@ -329,6 +329,13 @@ export default function Page(): JSX.Element {
                           className="w-5 h-5"
                         />
                       )}
+                      {selectedChain.id === 10143 && (
+                        <img
+                          src="https://cdn.prod.website-files.com/667c57e6f9254a4b6d914440/667d7104644c621965495f6e_LogoMark.svg"
+                          alt="Monad Testnet logo"
+                          className="w-5 h-5"
+                        />
+                      )}
                       <span>
                         {chainOptions.find((o) => o.chain.id === selectedChain.id)?.label}
                       </span>
@@ -360,6 +367,13 @@ export default function Page(): JSX.Element {
                                     src="https://github.com/base/brand-kit/blob/main/logo/symbol/Base_Symbol_Blue.png?raw=true"
                                     alt="Base logo"
                                     className="w-4 h-4"
+                                  />
+                                )}
+                                {o.chain.id === 10143 && (
+                                  <img
+                                    src="https://cdn.prod.website-files.com/667c57e6f9254a4b6d914440/667d7104644c621965495f6e_LogoMark.svg"
+                                    alt="Monad Testnet logo"
+                                    className="w-5 h-5"
                                   />
                                 )}
                                 <span>{o.label}</span>

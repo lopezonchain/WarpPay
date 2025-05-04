@@ -67,11 +67,18 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
             <div className="text-xs text-gray-400 pl-8">{desc}</div>
             {/* Logo de red Base */}
             {(action === "airdrop" || action === "scheduled") && (
-              <img
-                src="https://github.com/base/brand-kit/blob/main/logo/symbol/Base_Symbol_Blue.png?raw=true"
-                alt="Base logo"
-                className="absolute bottom-1 right-1 w-4 h-4 opacity-80"
-              />
+              <div>
+                <img
+                  src="https://github.com/base/brand-kit/blob/main/logo/symbol/Base_Symbol_Blue.png?raw=true"
+                  alt="Base logo"
+                  className="absolute bottom-1 right-6 w-4 h-4 opacity-80"
+                />
+                <img
+                  src="https://cdn.prod.website-files.com/667c57e6f9254a4b6d914440/667d7104644c621965495f6e_LogoMark.svg"
+                  alt="Monad Testnet logo"
+                  className="absolute bottom-1 right-1 w-4 h-4 opacity-80"
+                />
+              </div>
             )}
           </button>
         ))}
