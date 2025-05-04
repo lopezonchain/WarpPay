@@ -67,11 +67,9 @@ const WARPPAY_CONTRACT_MONAD = process.env.NEXT_PUBLIC_WARPPAY_MONAD_CONTRACT!;
 
 function getWarpPayContract(chainId: number): `0x${string}` {
   switch (chainId) {
-    // Chain ID de Base testnet (por ejemplo, 84531)
-    case 84531:
+    case 8453:
       return WARPPAY_CONTRACT_BASE as `0x${string}`;
-    // Chain ID de Monad testnet (por ejemplo, 1337)
-    case 1337:
+    case 10143:
       return WARPPAY_CONTRACT_MONAD as `0x${string}`;
     default:
       throw new Error(`WarpPay no soportado en chainId ${chainId}`);
