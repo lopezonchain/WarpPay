@@ -43,7 +43,7 @@ export default function HistoryScreen({
 
     setIsLoading(true)
     setError(null)
-    fetchHistory(address, chainId)
+    fetchHistory(address, chain!)
       .then((txs) => {
         setHistory(txs)
       })
