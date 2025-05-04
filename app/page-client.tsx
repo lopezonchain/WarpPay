@@ -404,8 +404,9 @@ export default function Page(): JSX.Element {
               </WalletDropdown>
             </Wallet>
 
+            <div>{saveFrameButton}</div>
           </div>
-          <div>{saveFrameButton}</div>
+          
         </header>
 
         <main className="flex-1">
