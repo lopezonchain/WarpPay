@@ -184,7 +184,7 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
       })
       setModalMessage(`Schedule cancelled: ${tx}`)
       // Refetch
-      const refreshed = (await publicClient.readContract({
+      const refreshed = (await publicClient?.readContract({
         address: getWarpPayContract(chainId),
         abi: contractAbi,
         functionName: 'getPaymentsByStatus',
