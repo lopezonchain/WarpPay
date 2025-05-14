@@ -59,7 +59,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
     },
     {
       icon: <FiClock />,
-      label: "Scheduled",
+      label: "Scheduler",
       desc: "Schedule one-time or recurring payments.",
       action: "schedule",
       enabled: true,

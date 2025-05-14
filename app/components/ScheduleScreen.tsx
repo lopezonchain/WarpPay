@@ -221,11 +221,15 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
   )
 
   return (
-    <div className="p-6 text-white bg-[#0f0d14] min-h-screen flex flex-col">
-      <button onClick={onBack} className="flex items-center text-purple-400 mb-6">
-        <FiArrowLeft className="mr-2" /> Back
-      </button>
-      <h2 className="text-3xl font-bold mb-6">Scheduler</h2>
+    <div className="p-4 text-white bg-[#0f0d14] flex flex-col">
+      
+      <button
+              onClick={onBack}
+              className="mb-4 flex items-center justify-center text-purple-400 text-lg px-4 py-2 bg-[#1a1725] rounded-lg max-w-[200px]"
+            >
+              <FiArrowLeft className="w-6 h-6 mr-2" /> Back
+            </button>
+            <h2 className="text-2xl font-bold mb-6 mx-auto">Scheduler</h2>
 
       {/* Main Tabs */}
       <div className="flex space-x-4 mb-8">
@@ -362,14 +366,14 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
         /* --- Manage View --- */
       <>
         {/* Status Filter */}
-        <div className="flex flex-wrap gap-3 mb-6">
+        <div className="flex flex-wrap gap-1 mb-6">
           {([0, 1, 2] as Status[]).map((s) => {
             const label = s === 0 ? 'Pending' : s === 1 ? 'Executed' : 'Failed'
             return (
               <button
                 key={s}
                 onClick={() => { setStatusFilter(s); setOffset(0) }}
-                className={`px-4 py-2 rounded-full font-medium transition ${
+                className={`px-2 py-1 rounded-full font-medium transition ${
                   statusFilter === s
                     ? 'bg-purple-500 hover:bg-purple-400'
                     : 'bg-[#1a1725] hover:bg-[#2a2635]'
