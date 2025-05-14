@@ -37,8 +37,9 @@ import {
   baseSepolia, monadTestnet
 } from "wagmi/chains";
 import ScheduleScreen from "./components/ScheduleScreen";
+import EarnScreen from "./components/EarnScreen";
 
-export type WarpView = "home" | "send" | "request" | "airdrop" | "schedule" | "history" ;
+export type WarpView = "home" | "send" | "request" | "airdrop" | "schedule" | "history"  | "earn" ;
 
 const chainOptions = [
   //{ label: "Sepolia", chain: baseSepolia },
@@ -415,6 +416,7 @@ export default function Page(): JSX.Element {
           {warpView === "request" && <RequestScreen address={address} onBack={handleBack} />}
           {warpView === "airdrop" && <AirdropScreen address={address} onBack={handleBack} />}
           {warpView === "schedule" && <ScheduleScreen onBack={handleBack} />}
+          {warpView === "earn" && <EarnScreen onBack={handleBack} />}
           
         </main>
       </div>
