@@ -9,7 +9,7 @@ import { parseEther, parseUnits, encodeFunctionData } from 'viem'
 import contractAbi from '../services/contractAbi.json'
 import { getWarpPayContract } from '../services/contractService'
 import { resolveEnsName } from '../services/ensResolver'
-import {scheduleCyclicPayment, schedulePayment} from '../services/contractService'
+import { scheduleCyclicPayment, schedulePayment, cancelActivePayment, cancelCyclicPayment } from '../services/contractService'
 import type { ScheduledPayment } from '../services/contractService'
 
 type Tab = 'create' | 'manage'
@@ -52,28 +52,34 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
 
   // Set minimum datetime-local to "now"
   useEffect(() => {
-    const nowStr = new Date().toISOString().slice(0, 16)
-    setMinDateTime(nowStr)
+    setMinDateTime(new Date().toISOString().slice(0, 16))
   }, [])
 
   // Fetch schedules when in Manage tab or filters change
   useEffect(() => {
-    if (tab !== 'manage' || !walletClient || !publicClient) return
-    ;(async () => {
-      try {
-        const list = await publicClient.readContract({
-          address: getWarpPayContract(chainId),
-          abi: contractAbi,
-          functionName: 'getPaymentsByStatus',
-          args: [statusFilter, BigInt(offset), BigInt(limit)],
-        })
-        setPayments(list as ScheduledPayment[])
-      } catch (e) {
-        console.error('Error fetching payments', e)
-        setModalMessage('Failed to load scheduled payments')
-      }
-    })()
-  }, [tab, statusFilter, offset, walletClient, publicClient, chainId])
+  if (tab !== 'manage' || !walletClient || !publicClient) return;
+  (async () => {
+    try {
+      const raw = await publicClient.readContract({
+        address: getWarpPayContract(chainId),
+        abi: contractAbi,
+        functionName: 'getPaymentsByStatus',
+        args: [statusFilter, BigInt(offset), BigInt(limit)],
+      }) as ScheduledPayment[];
+
+      // empacamos con su id real = offset + posición
+      const withIds = raw.map((p, i) => ({
+        ...p,
+        _id: BigInt(offset + i),
+      }));
+
+      setPayments(withIds);
+    } catch (e) {
+      console.error('Error fetching payments', e);
+      setModalMessage('Failed to load scheduled payments');
+    }
+  })();
+}, [tab, statusFilter, offset, walletClient, publicClient, chainId]);
 
   // Parse user-entered amount
   async function parseAmount(amt: string) {
@@ -158,7 +164,7 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
       }
 
       setModalMessage(`Transaction submitted: ${tx.hash}`)
-      // resetea form
+      // reset form
       setRecipient('')
       setAmount('')
       setExecuteTime('')
@@ -172,36 +178,32 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
   }
   
   // Handle schedule cancellation
-  const handleCancel = async (item: ScheduledPayment) => {
-    if (!walletClient) return
-    try {
-      setModalMessage('Cancelling schedule…')
-      const fn =
-        item.cyclicId !== BigInt(0)
-          ? 'cancelCyclicPayment'
-          : 'cancelActivePayment'
-      const args = [
-        item.cyclicId !== BigInt(0) ? item.cyclicId : item.executeTime,
-      ]
-      const data = encodeFunctionData({ abi: contractAbi, functionName: fn, args })
-      const tx = await walletClient.sendTransaction({
-        to: getWarpPayContract(chainId),
-        data,
-      })
-      setModalMessage(`Schedule cancelled: ${tx}`)
-      // Refetch
-      const refreshed = (await publicClient?.readContract({
-        address: getWarpPayContract(chainId),
-        abi: contractAbi,
-        functionName: 'getPaymentsByStatus',
-        args: [statusFilter, BigInt(offset), BigInt(limit)],
-      })) as ScheduledPayment[]
-      setPayments(refreshed)
-    } catch (e: any) {
-      console.error('Error cancelling', e)
-      setModalMessage(`Error cancelling: ${e.message}`)
+  const handleCancel = async (id: bigint, cyclicId: bigint) => {
+  if (!walletClient) return;
+  try {
+    setModalMessage('Cancelling schedule…');
+
+    let tx;
+    if (cyclicId !== BigInt(0)) {
+      tx = await cancelCyclicPayment(walletClient, cyclicId);
+    } else {
+      tx = await cancelActivePayment(walletClient, id);
     }
+
+    setModalMessage(`Schedule cancelled: ${tx.hash}`);
+    // refetch
+    const refreshed = await publicClient?.readContract({
+      address: getWarpPayContract(chainId),
+      abi: contractAbi,
+      functionName: 'getPaymentsByStatus',
+      args: [statusFilter, BigInt(offset), BigInt(limit)],
+    }) as ScheduledPayment[];
+    setPayments(refreshed);
+  } catch (e: any) {
+    console.error('Error cancelling', e);
+    setModalMessage(`Error cancelling: ${e.message}`);
   }
+};
 
   // Unsupported network message
   if (chainId && chainId !== 8453 && chainId !== 10143) {
@@ -222,14 +224,13 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
 
   return (
     <div className="p-4 text-white bg-[#0f0d14] flex flex-col">
-      
       <button
-              onClick={onBack}
-              className="mb-4 flex items-center justify-center text-purple-400 text-lg px-4 py-2 bg-[#1a1725] rounded-lg max-w-[200px]"
-            >
-              <FiArrowLeft className="w-6 h-6 mr-2" /> Back
-            </button>
-            <h2 className="text-2xl font-bold mb-6 mx-auto">Scheduler</h2>
+        onClick={onBack}
+        className="mb-4 flex items-center justify-center text-purple-400 text-lg px-4 py-2 bg-[#1a1725] rounded-lg max-w-[200px]"
+      >
+        <FiArrowLeft className="w-6 h-6 mr-2" /> Back
+      </button>
+      <h2 className="text-2xl font-bold mb-6 mx-auto">Scheduler</h2>
 
       {/* Main Tabs */}
       <div className="flex space-x-4 mb-8">
@@ -363,13 +364,10 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
           </button>
         </div>
       ) : (
-        /* --- Manage View --- */
-      <>
-        {/* Status Filter */}
-        <div className="flex flex-wrap gap-1 mb-6">
-          {([0, 1, 2] as Status[]).map((s) => {
-            const label = s === 0 ? 'Pending' : s === 1 ? 'Executed' : 'Failed'
-            return (
+        <>
+          {/* Status Filter */}
+          <div className="flex flex-wrap gap-1 mb-6">
+            {([0, 1, 2] as Status[]).map(s => (
               <button
                 key={s}
                 onClick={() => { setStatusFilter(s); setOffset(0) }}
@@ -379,93 +377,89 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
                     : 'bg-[#1a1725] hover:bg-[#2a2635]'
                 }`}
               >
-                {label}
+                {s === 0 ? 'Pending' : s === 1 ? 'Executed' : 'Failed'}
               </button>
-            )
-          })}
-        </div>
-
-        {visiblePayments.length === 0 ? (
-          <p className="text-center text-gray-500 mt-12">
-            No schedules found
-          </p>
-        ) : (
-          <div className="flex flex-col items-start space-y-6 overflow-auto">
-            {visiblePayments.map((p, i) => {
-              const dateStr = new Date(Number(p.executeTime) * 1000).toLocaleString()
-              const amountEth = (
-                Number(p.value) / 1e18
-              ).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })
-              const status = p.isExecuted ? 'Executed' : p.isFailed ? 'Failed' : 'Pending'
-              const shortAddr = `${p.recipient.slice(0, 6)}…${p.recipient.slice(-4)}`
-
-              return (
-                <div
-                  key={i}
-                  className="w-full max-w-sm p-5 bg-gradient-to-br from-gray-800 to-gray-900 ring-1 ring-gray-700 rounded-2xl shadow-md hover:ring-purple-600 transition-all flex flex-col"
-                >
-                  <div className="flex justify-between items-center mb-4">
-                    <span
-                      className="text-sm font-medium text-gray-300"
-                      title={p.recipient}
-                    >
-                      Recipient: {shortAddr}
-                    </span>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        status === 'Pending'
-                          ? 'bg-yellow-500'
-                          : status === 'Executed'
-                          ? 'bg-green-500'
-                          : 'bg-red-500'
-                      }`}
-                    >
-                      {status}
-                    </span>
-                  </div>
-
-                  <dl className="flex-1 space-y-3 text-sm">
-                    <div>
-                      <dt className="text-gray-400">Date</dt>
-                      <dd className="text-white">{dateStr}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-gray-400">Amount</dt>
-                      <dd className="text-white">{amountEth} ETH</dd>
-                    </div>
-                  </dl>
-
-                  {statusFilter === 0 && (
-                    <button
-                      onClick={() => handleCancel(p)}
-                      className="mt-6 w-full py-2 bg-red-600 hover:bg-red-700 rounded-lg font-medium transition"
-                    >
-                      Cancel
-                    </button>
-                  )}
-                </div>
-              )
-            })}
+            ))}
           </div>
-        )}
 
-        {/* Pagination */}
-        <div className="flex justify-between items-center mt-8">
-          <button
-            onClick={() => setOffset((o) => Math.max(0, o - limit))}
-            disabled={offset === 0}
-            className="px-4 py-2 rounded-lg bg-[#1a1725] hover:bg-[#2a2635] disabled:opacity-50 transition"
-          >
-            Prev
-          </button>
-          <button
-            onClick={() => setOffset((o) => o + limit)}
-            className="px-4 py-2 rounded-lg bg-[#1a1725] hover:bg-[#2a2635] transition"
-          >
-            Next
-          </button>
-        </div>
-      </>
+          {visiblePayments.length === 0 ? (
+            <p className="text-center text-gray-500 mt-12">No schedules found</p>
+          ) : (
+            <div className="flex flex-col items-start space-y-6 overflow-auto">
+              {visiblePayments.map(p => {
+                const id = p._id!;
+                const dateStr = new Date(Number(p.executeTime) * 1000).toLocaleString()
+                const amountEth = (Number(p.value) / 1e18).toLocaleString(undefined, {
+                  minimumFractionDigits: 4,
+                  maximumFractionDigits: 4
+                })
+                const status = p.isExecuted ? 'Executed' : p.isFailed ? 'Failed' : 'Pending'
+                const shortAddr = `${p.recipient.slice(0, 6)}…${p.recipient.slice(-4)}`
+
+                return (
+                  <div
+                    key={id}
+                    className="w-full max-w-sm p-5 bg-gradient-to-br from-gray-800 to-gray-900 ring-1 ring-gray-700 rounded-2xl shadow-md hover:ring-purple-600 transition-all flex flex-col"
+                  >
+                    <div className="flex justify-between items-center mb-4">
+                      <span title={p.recipient} className="text-sm font-medium text-gray-300">
+                        Recipient: {shortAddr}
+                      </span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          status === 'Pending'
+                            ? 'bg-yellow-500'
+                            : status === 'Executed'
+                            ? 'bg-green-500'
+                            : 'bg-red-500'
+                        }`}>
+                        {status}
+                      </span>
+                    </div>
+
+                    <dl className="flex-1 space-y-3 text-sm">
+                      <div>
+                        <dt className="text-gray-400">Date</dt>
+                        <dd className="text-white">{dateStr}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-gray-400">Amount</dt>
+                        <dd className="text-white">{amountEth} ETH</dd>
+                      </div>
+                    </dl>
+
+                    {statusFilter === 0 && (
+                      <button
+                        onClick={() => handleCancel(id, p.cyclicId)}
+                        className="mt-6 w-full py-2 bg-red-600 hover:bg-red-700 rounded-lg font-medium transition"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Pagination (solo si hay más de 5 resultados) */}
+          {visiblePayments.length > 5 && (
+            <div className="flex justify-between items-center mt-8">
+              <button
+                onClick={() => setOffset(o => Math.max(0, o - limit))}
+                disabled={offset === 0}
+                className="px-4 py-2 rounded-lg bg-[#1a1725] hover:bg-[#2a2438] disabled:opacity-50 transition"
+              >
+                Prev
+              </button>
+              <button
+                onClick={() => setOffset(o => o + limit)}
+                className="px-4 py-2 rounded-lg bg-[#1a1725] hover:bg-[#2a2438] transition"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {modalMessage && <AlertModal message={modalMessage} onClose={() => setModalMessage(null)} />}

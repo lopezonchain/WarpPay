@@ -51,6 +51,7 @@ export interface Tx {
 }
 
 export interface ScheduledPayment {
+  _id?: bigint;              // ← nuevo campo
   creator: `0x${string}`;
   recipient: `0x${string}`;
   value: bigint;
