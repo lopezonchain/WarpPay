@@ -1,4 +1,5 @@
 // src/services/contractService.ts
+import { Chain } from "viem";
 import contractAbi from "./contractAbi.json";
 import { resolveEnsName } from "./ensResolver";
 
@@ -60,6 +61,8 @@ export interface ScheduledPayment {
   failCount: number;
   cyclicId: bigint;
 }
+
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 
 // Address of your WarpPay contract
 const WARPPAY_CONTRACT_BASE = process.env.NEXT_PUBLIC_WARPPAY_BASE_CONTRACT!;
@@ -151,7 +154,7 @@ export async function createAirdrop(
   if (tokenAddress) {
     // 1) Calcular neto total y fee
     const totalNet = values.reduce((acc, v) => Number(acc) + Number(v), 0);
-    const totalFee = (BigInt(totalNet) * BigInt(2)) /  BigInt(100);
+    const totalFee = (BigInt(totalNet) * BigInt(2)) / BigInt(100);
 
     // 2) Aprobar al contrato la suma neta + fee
     const approveTxHash = await walletClient.writeContract({
@@ -175,7 +178,7 @@ export async function createAirdrop(
     });
   } else {
     const totalNet = values.reduce((acc, v) => Number(acc) + Number(v), 0);
-    const totalFee = (BigInt(totalNet) * BigInt(2)) /  BigInt(100);
+    const totalFee = (BigInt(totalNet) * BigInt(2)) / BigInt(100);
 
     txHash = await walletClient.writeContract({
       address: warpPayContract,
@@ -198,35 +201,87 @@ export async function createAirdrop(
  */
 export async function schedulePayment(
   walletClient: any,
-  recipient: `0x${string}`,
+  publicClient: any,
+  recipientRaw: string,
   value: bigint,
-  tokenAddress: `0x${string}` | null,
+  tokenAddressRaw: string | null,
   executeTime: number
 ): Promise<Tx> {
-  if (!walletClient) throw new Error("No wallet client available");
+  if (!walletClient || !publicClient) throw new Error("No wallet or public client")
 
-  const chainId: number = walletClient.chain.id;
-  const warpPayContract = getWarpPayContract(chainId);
+  // 1️⃣ Prepara direcciones y contrato
+  const recipient = recipientRaw.startsWith("0x")
+    ? (recipientRaw as `0x${string}`)
+    : await resolveEnsName(recipientRaw)
+  const token = tokenAddressRaw ?? ZERO_ADDRESS
+  const warpPay = getWarpPayContract(walletClient.chain.id)
 
-  const token = tokenAddress ?? "0x0000000000000000000000000000000000000000";
-  const overrides: any = {};
-  if (token === "0x0000000000000000000000000000000000000000") {
-    overrides.value = value;
+  // 2️⃣ Verifica flags y mínimos on-chain
+  const creationPaused = await publicClient.readContract({
+    address: warpPay,
+    abi: [{ inputs: [], name: "creationPaused", outputs: [{ type: "bool" }], stateMutability: "view", type: "function" }],
+    functionName: "creationPaused"
+  })
+  if (creationPaused) throw new Error("Scheduling paused on-chain")
+
+  const minEthPayment = await publicClient.readContract({
+    address: warpPay,
+    abi: [{ inputs: [], name: "minEthPayment", outputs: [{ type: "uint256" }], stateMutability: "view", type: "function" }],
+    functionName: "minEthPayment"
+  }) as bigint
+  if (value < minEthPayment) throw new Error(`Value below minimum of ${minEthPayment.toString()} wei`)
+
+  // 3️⃣ Lee porcentajes on-chain
+  const creationFeePct = await publicClient.readContract({
+    address: warpPay,
+    abi: [{ inputs: [], name: "creationFeePercent", outputs: [{ type: "uint256" }], stateMutability: "view", type: "function" }],
+    functionName: "creationFeePercent"
+  }) as bigint
+  const executorRewardPct = await publicClient.readContract({
+    address: warpPay,
+    abi: [{ inputs: [], name: "executorRewardPercent", outputs: [{ type: "uint256" }], stateMutability: "view", type: "function" }],
+    functionName: "executorRewardPercent"
+  }) as bigint
+
+  // 4️⃣ Calcula fees y total a enviar
+  const creationFee = (value * creationFeePct) / BigInt(100)
+  const reward      = (value * executorRewardPct) / BigInt(100)
+  const totalValue  = token === ZERO_ADDRESS
+    ? value + creationFee + reward
+    : BigInt(0)
+
+  console.log("schedulePayment ▶", {
+    value: value.toString(),
+    creationFee: creationFee.toString(),
+    reward: reward.toString(),
+    msgValue: totalValue.toString()
+  })
+
+  // 5️⃣ Approve si es ERC20
+  if (token !== ZERO_ADDRESS) {
+    const approveAmount = value + creationFee + reward
+    await walletClient.writeContract({
+      address: token,
+      abi: erc20Abi,
+      functionName: "approve",
+      args: [warpPay, approveAmount]
+    })
   }
 
+  // 6️⃣ Lanza la transacción
   const txHash = await walletClient.writeContract({
-    address: warpPayContract,
+    address: warpPay,
     abi: contractAbi,
     functionName: "schedulePayment",
     args: [recipient, value, token, BigInt(executeTime)],
-    ...overrides,
-  });
+    value: totalValue
+  })
 
   return {
     summary: `Scheduled payment to ${recipient} at ${new Date(executeTime * 1000).toLocaleString()}`,
     hash: txHash,
-    timestamp: Date.now(),
-  };
+    timestamp: Date.now()
+  }
 }
 
 /**
@@ -234,26 +289,80 @@ export async function schedulePayment(
  */
 export async function scheduleCyclicPayment(
   walletClient: any,
-  recipient: `0x${string}`,
+  publicClient: any,
+  recipientRaw: string,
   value: bigint,
-  tokenAddress: `0x${string}` | null,
+  tokenAddressRaw: string | null,
   interval: number,
   firstExecuteTime: number,
   repetitions: number
 ): Promise<Tx> {
-  if (!walletClient) throw new Error("No wallet client available");
+  if (!walletClient || !publicClient) throw new Error("No wallet or public client")
 
-  const token = tokenAddress ?? "0x0000000000000000000000000000000000000000";
-  const overrides: any = {};
-  if (token === "0x0000000000000000000000000000000000000000") {
-    overrides.value = value * BigInt(repetitions);
+  // 1️⃣ Prepara direcciones y contrato
+  const recipient = recipientRaw.startsWith("0x")
+    ? (recipientRaw as `0x${string}`)
+    : await resolveEnsName(recipientRaw)
+  const token = tokenAddressRaw ?? ZERO_ADDRESS
+  const warpPay = getWarpPayContract(walletClient.chain.id)
+
+  // 2️⃣ Verifica flags y mínimos on-chain
+  const creationPaused = await publicClient.readContract({
+    address: warpPay,
+    abi: [{ inputs: [], name: "creationPaused", outputs: [{ type: "bool" }], stateMutability: "view", type: "function" }],
+    functionName: "creationPaused"
+  })
+  if (creationPaused) throw new Error("Scheduling paused on-chain")
+
+  const minEthPayment = await publicClient.readContract({
+    address: warpPay,
+    abi: [{ inputs: [], name: "minEthPayment", outputs: [{ type: "uint256" }], stateMutability: "view", type: "function" }],
+    functionName: "minEthPayment"
+  }) as bigint
+  if (value < minEthPayment) throw new Error(`Value below minimum of ${minEthPayment.toString()} wei`)
+  if (repetitions <= 0) throw new Error("Repetitions must be > 0")
+
+  // 3️⃣ Porcentajes on-chain
+  const creationFeePct = await publicClient.readContract({
+    address: warpPay,
+    abi: [{ inputs: [], name: "creationFeePercent", outputs: [{ type: "uint256" }], stateMutability: "view", type: "function" }],
+    functionName: "creationFeePercent"
+  }) as bigint
+  const executorRewardPct = await publicClient.readContract({
+    address: warpPay,
+    abi: [{ inputs: [], name: "executorRewardPercent", outputs: [{ type: "uint256" }], stateMutability: "view", type: "function" }],
+    functionName: "executorRewardPercent"
+  }) as bigint
+
+  // 4️⃣ Totales y msg.value
+  const totalNet    = value * BigInt(repetitions)
+  const creationFee = (totalNet * creationFeePct) / BigInt(100)
+  const totalReward = (totalNet * executorRewardPct) / BigInt(100)
+  const totalValue  = token === ZERO_ADDRESS
+    ? totalNet + creationFee + totalReward
+    : BigInt(0)
+
+  console.log("scheduleCyclicPayment ▶", {
+    totalNet: totalNet.toString(),
+    creationFee: creationFee.toString(),
+    totalReward: totalReward.toString(),
+    msgValue: totalValue.toString()
+  })
+
+  // 5️⃣ Approve si es ERC20
+  if (token !== ZERO_ADDRESS) {
+    const approveAmount = totalNet + creationFee + totalReward
+    await walletClient.writeContract({
+      address: token,
+      abi: erc20Abi,
+      functionName: "approve",
+      args: [warpPay, approveAmount]
+    })
   }
 
-  const chainId: number = walletClient.chain.id;
-  const warpPayContract = getWarpPayContract(chainId);
-
+  // 6️⃣ Lanza la transacción
   const txHash = await walletClient.writeContract({
-    address: warpPayContract,
+    address: warpPay,
     abi: contractAbi,
     functionName: "scheduleCyclicPayment",
     args: [
@@ -262,17 +371,18 @@ export async function scheduleCyclicPayment(
       token,
       BigInt(interval),
       BigInt(firstExecuteTime),
-      BigInt(repetitions),
+      BigInt(repetitions)
     ],
-    ...overrides,
-  });
+    value: totalValue
+  })
 
   return {
-    summary: `Scheduled cycle of ${repetitions} payments to ${recipient} every ${interval}s`,
+    summary: `Scheduled cycle of ${repetitions} payments to ${recipient}`,
     hash: txHash,
-    timestamp: Date.now(),
-  };
+    timestamp: Date.now()
+  }
 }
+
 
 /**
  * Cancel an active scheduled payment.
@@ -402,6 +512,7 @@ export async function getDuePayments(
  */
 export async function getPaymentsByStatus(
   walletClient: any,
+  publicClient: any,
   status: number,
   offset: number,
   limit: number
@@ -411,7 +522,7 @@ export async function getPaymentsByStatus(
   const chainId: number = walletClient.chain.id;
   const warpPayContract = getWarpPayContract(chainId);
 
-  const list = await walletClient.readContract({
+  const list = await publicClient.readContract({
     address: warpPayContract,
     abi: contractAbi,
     functionName: "getPaymentsByStatus",
@@ -425,7 +536,8 @@ export async function getPaymentsByStatus(
  * Fetch transaction history (Etherscan).
  */
 export async function fetchHistory(
-  address: string
+  address: string,
+  chain: Chain
 ): Promise<Tx[]> {
   const apiKey = process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY!;
   const url =

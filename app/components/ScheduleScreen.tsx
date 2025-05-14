@@ -1,0 +1,470 @@
+'use client'
+
+import React, { useEffect, useState } from 'react'
+import { FiArrowLeft } from 'react-icons/fi'
+import AlertModal from './AlertModal'
+import TokenSelector, { TokenOption } from './TokenSelector'
+import { useWalletClient, usePublicClient } from 'wagmi'
+import { parseEther, parseUnits, encodeFunctionData } from 'viem'
+import contractAbi from '../services/contractAbi.json'
+import { getWarpPayContract } from '../services/contractService'
+import { resolveEnsName } from '../services/ensResolver'
+import {scheduleCyclicPayment, schedulePayment} from '../services/contractService'
+import type { ScheduledPayment } from '../services/contractService'
+
+type Tab = 'create' | 'manage'
+type Status = 0 | 1 | 2 // 0 = pending, 1 = executed, 2 = failed
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+
+export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
+  const { data: walletClient } = useWalletClient()
+  const publicClient = usePublicClient()
+  const [chainId, setChainId] = useState<number>(0)
+
+  const [tab, setTab] = useState<Tab>('create')
+  const [modalMessage, setModalMessage] = useState<string | null>(null)
+
+  // Creation form state
+  const [isCyclic, setIsCyclic] = useState(false)
+  const [recipient, setRecipient] = useState('')
+  const [amount, setAmount] = useState('')
+  const [tokenOption, setTokenOption] = useState<TokenOption>('ETH')
+  const [customAddress, setCustomAddress] = useState('')
+  const tokenAddress = tokenOption === 'ETH' ? null : (customAddress as `0x${string}`)
+
+  const [executeTime, setExecuteTime] = useState<string>('')
+  const [minDateTime, setMinDateTime] = useState('')
+
+  const [intervalValue, setIntervalValue] = useState<string>('')
+  const [intervalUnit, setIntervalUnit] = useState<'days' | 'hours' | 'weeks'>('days')
+  const [repetitions, setRepetitions] = useState<string>('1')
+
+  // Management state
+  const [statusFilter, setStatusFilter] = useState<Status>(0)
+  const [payments, setPayments] = useState<ScheduledPayment[]>([])
+  const [offset, setOffset] = useState(0)
+  const limit = 10
+
+  // Detect chainId
+  useEffect(() => {
+    publicClient?.getChainId().then(id => setChainId(id))
+  }, [publicClient])
+
+  // Set minimum datetime-local to "now"
+  useEffect(() => {
+    const nowStr = new Date().toISOString().slice(0, 16)
+    setMinDateTime(nowStr)
+  }, [])
+
+  // Fetch schedules when in Manage tab or filters change
+  useEffect(() => {
+    if (tab !== 'manage' || !walletClient || !publicClient) return
+    ;(async () => {
+      try {
+        const list = await publicClient.readContract({
+          address: getWarpPayContract(chainId),
+          abi: contractAbi,
+          functionName: 'getPaymentsByStatus',
+          args: [statusFilter, BigInt(offset), BigInt(limit)],
+        })
+        setPayments(list as ScheduledPayment[])
+      } catch (e) {
+        console.error('Error fetching payments', e)
+        setModalMessage('Failed to load scheduled payments')
+      }
+    })()
+  }, [tab, statusFilter, offset, walletClient, publicClient, chainId])
+
+  // Parse user-entered amount
+  async function parseAmount(amt: string) {
+    if (tokenOption === 'ETH') return parseEther(amt)
+    const decimals = (await publicClient?.readContract({
+      address: tokenAddress!,
+      abi: [
+        {
+          type: 'function',
+          name: 'decimals',
+          stateMutability: 'view',
+          inputs: [],
+          outputs: [{ internalType: 'uint8', name: '', type: 'uint8' }],
+        },
+      ],
+      functionName: 'decimals',
+    })) as number
+    return parseUnits(amt, decimals)
+  }
+
+  // Convert interval+unit to seconds
+  function getIntervalSeconds() {
+    const val = Number(intervalValue)
+    if (isNaN(val) || val <= 0) return 0
+    switch (intervalUnit) {
+      case 'hours':
+        return val * 3600
+      case 'weeks':
+        return val * 7 * 24 * 3600
+      default:
+        return val * 24 * 3600
+    }
+  }
+
+  // Handle schedule creation
+  const handleCreate = async () => {
+    if (!walletClient || !publicClient) {
+      setModalMessage('Please connect your wallet')
+      return
+    }
+    if (!recipient || !amount || !executeTime) {
+      setModalMessage('Please fill recipient, amount and date/time')
+      return
+    }
+
+    try {
+      setModalMessage('Resolving recipient…')
+      const to = recipient.startsWith('0x')
+        ? (recipient as `0x${string}`)
+        : await resolveEnsName(recipient)
+
+      setModalMessage('Preparing transaction…')
+      const baseAmount = await parseAmount(amount)
+      const execTs = Math.floor(new Date(executeTime).getTime() / 1000)
+
+      let tx
+      if (isCyclic) {
+        const secs = getIntervalSeconds()
+        if (!secs || !repetitions) {
+          setModalMessage('Please fill a valid interval and repetitions')
+          return
+        }
+        tx = await scheduleCyclicPayment(
+          walletClient,
+          publicClient,
+          to,
+          baseAmount,
+          tokenAddress,
+          secs,
+          execTs,
+          Number(repetitions),
+        )
+      } else {
+        tx = await schedulePayment(
+          walletClient,
+          publicClient,
+          to,
+          baseAmount,
+          tokenAddress,
+          execTs,
+        )
+      }
+
+      setModalMessage(`Transaction submitted: ${tx.hash}`)
+      // resetea form
+      setRecipient('')
+      setAmount('')
+      setExecuteTime('')
+      setIntervalValue('')
+      setIntervalUnit('days')
+      setRepetitions('1')
+    } catch (err: any) {
+      console.error(err)
+      setModalMessage(`Error: ${err.message || err}`)
+    }
+  }
+  
+  // Handle schedule cancellation
+  const handleCancel = async (item: ScheduledPayment) => {
+    if (!walletClient) return
+    try {
+      setModalMessage('Cancelling schedule…')
+      const fn =
+        item.cyclicId !== BigInt(0)
+          ? 'cancelCyclicPayment'
+          : 'cancelActivePayment'
+      const args = [
+        item.cyclicId !== BigInt(0) ? item.cyclicId : item.executeTime,
+      ]
+      const data = encodeFunctionData({ abi: contractAbi, functionName: fn, args })
+      const tx = await walletClient.sendTransaction({
+        to: getWarpPayContract(chainId),
+        data,
+      })
+      setModalMessage(`Schedule cancelled: ${tx}`)
+      // Refetch
+      const refreshed = (await publicClient?.readContract({
+        address: getWarpPayContract(chainId),
+        abi: contractAbi,
+        functionName: 'getPaymentsByStatus',
+        args: [statusFilter, BigInt(offset), BigInt(limit)],
+      })) as ScheduledPayment[]
+      setPayments(refreshed)
+    } catch (e: any) {
+      console.error('Error cancelling', e)
+      setModalMessage(`Error cancelling: ${e.message}`)
+    }
+  }
+
+  // Unsupported network message
+  if (chainId && chainId !== 8453 && chainId !== 10143) {
+    return (
+      <div className="p-4 text-white bg-[#0f0d14] min-h-screen">
+        <button onClick={onBack} className="flex items-center text-purple-400 mb-4">
+          <FiArrowLeft className="mr-2" /> Back
+        </button>
+        <p>This feature works only on Base or Monad Testnet</p>
+      </div>
+    )
+  }
+
+  // Hide pending with zero-address
+  const visiblePayments = payments.filter(
+    p => !(statusFilter === 0 && p.recipient === ZERO_ADDRESS)
+  )
+
+  return (
+    <div className="p-6 text-white bg-[#0f0d14] min-h-screen flex flex-col">
+      <button onClick={onBack} className="flex items-center text-purple-400 mb-6">
+        <FiArrowLeft className="mr-2" /> Back
+      </button>
+      <h2 className="text-3xl font-bold mb-6">Scheduler</h2>
+
+      {/* Main Tabs */}
+      <div className="flex space-x-4 mb-8">
+        <button
+          onClick={() => setTab('create')}
+          className={`px-5 py-2 rounded-xl font-medium ${
+            tab === 'create' ? 'bg-purple-600' : 'bg-[#1a1725]'
+          }`}
+        >
+          Create
+        </button>
+        <button
+          onClick={() => setTab('manage')}
+          className={`px-5 py-2 rounded-xl font-medium ${
+            tab === 'manage' ? 'bg-purple-600' : 'bg-[#1a1725]'
+          }`}
+        >
+          Manage
+        </button>
+      </div>
+
+      {tab === 'create' ? (
+        <div className="flex-1 space-y-6">
+          {/* One-Time / Cyclic Toggle */}
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setIsCyclic(false)}
+              className={`flex-1 py-2 rounded-lg ${
+                !isCyclic ? 'bg-purple-500' : 'bg-[#1a1725]'
+              }`}
+            >
+              One-Time
+            </button>
+            <button
+              onClick={() => setIsCyclic(true)}
+              className={`flex-1 py-2 rounded-lg ${
+                isCyclic ? 'bg-purple-500' : 'bg-[#1a1725]'
+              }`}
+            >
+              Cyclic
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            <label className="block text-sm font-medium">Recipient (address or ENS)</label>
+            <input
+              type="text"
+              value={recipient}
+              onChange={e => setRecipient(e.target.value)}
+              className="w-full p-3 rounded-lg bg-[#1a1725] placeholder-gray-500"
+              placeholder="0x... or alice.eth"
+            />
+          </div>
+
+          <div className="space-y-4">
+            <label className="block text-sm font-medium">Amount</label>
+            <input
+              type="text"
+              value={amount}
+              onChange={e => setAmount(e.target.value)}
+              className="w-full p-3 rounded-lg bg-[#1a1725] placeholder-gray-500"
+              placeholder="e.g. 0.5"
+            />
+          </div>
+
+          <TokenSelector
+            selected={tokenOption}
+            onSelect={setTokenOption}
+            customAddress={customAddress}
+            onCustomAddressChange={setCustomAddress}
+            chainId={chainId}
+          />
+
+          <div className="space-y-4">
+            <label className="block text-sm font-medium">Execute Time</label>
+            <input
+              type="datetime-local"
+              min={minDateTime}
+              value={executeTime}
+              onChange={e => setExecuteTime(e.target.value)}
+              className="w-full p-3 rounded-lg bg-[#1a1725]"
+            />
+          </div>
+
+          {isCyclic && (
+            <>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">
+                  Interval
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={intervalValue}
+                  onChange={e => setIntervalValue(e.target.value)}
+                  className="w-full p-3 rounded-lg bg-[#1a1725]"
+                  placeholder="Enter number"
+                />
+                <div className="flex space-x-2 mt-2">
+                  {(['days', 'hours', 'weeks'] as const).map(u => (
+                    <button
+                      key={u}
+                      onClick={() => setIntervalUnit(u)}
+                      className={`flex-1 py-2 rounded-lg text-sm ${
+                        intervalUnit === u ? 'bg-purple-500' : 'bg-[#1a1725]'
+                      }`}
+                    >
+                      {u.charAt(0).toUpperCase() + u.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">Repetitions</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={repetitions}
+                  onChange={e => setRepetitions(e.target.value)}
+                  className="w-full p-3 rounded-lg bg-[#1a1725]"
+                />
+              </div>
+            </>
+          )}
+
+          <button
+            onClick={handleCreate}
+            className="mt-6 w-full py-4 bg-purple-600 hover:bg-purple-700 rounded-xl text-lg font-bold transition"
+          >
+            {isCyclic ? 'Schedule Cyclic' : 'Schedule One-Time'}
+          </button>
+        </div>
+      ) : (
+        /* --- Manage View --- */
+      <>
+        {/* Status Filter */}
+        <div className="flex flex-wrap gap-3 mb-6">
+          {([0, 1, 2] as Status[]).map((s) => {
+            const label = s === 0 ? 'Pending' : s === 1 ? 'Executed' : 'Failed'
+            return (
+              <button
+                key={s}
+                onClick={() => { setStatusFilter(s); setOffset(0) }}
+                className={`px-4 py-2 rounded-full font-medium transition ${
+                  statusFilter === s
+                    ? 'bg-purple-500 hover:bg-purple-400'
+                    : 'bg-[#1a1725] hover:bg-[#2a2635]'
+                }`}
+              >
+                {label}
+              </button>
+            )
+          })}
+        </div>
+
+        {visiblePayments.length === 0 ? (
+          <p className="text-center text-gray-500 mt-12">
+            No schedules found
+          </p>
+        ) : (
+          <div className="flex flex-col items-start space-y-6 overflow-auto">
+            {visiblePayments.map((p, i) => {
+              const dateStr = new Date(Number(p.executeTime) * 1000).toLocaleString()
+              const amountEth = (
+                Number(p.value) / 1e18
+              ).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })
+              const status = p.isExecuted ? 'Executed' : p.isFailed ? 'Failed' : 'Pending'
+              const shortAddr = `${p.recipient.slice(0, 6)}…${p.recipient.slice(-4)}`
+
+              return (
+                <div
+                  key={i}
+                  className="w-full max-w-sm p-5 bg-gradient-to-br from-gray-800 to-gray-900 ring-1 ring-gray-700 rounded-2xl shadow-md hover:ring-purple-600 transition-all flex flex-col"
+                >
+                  <div className="flex justify-between items-center mb-4">
+                    <span
+                      className="text-sm font-medium text-gray-300"
+                      title={p.recipient}
+                    >
+                      Recipient: {shortAddr}
+                    </span>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        status === 'Pending'
+                          ? 'bg-yellow-500'
+                          : status === 'Executed'
+                          ? 'bg-green-500'
+                          : 'bg-red-500'
+                      }`}
+                    >
+                      {status}
+                    </span>
+                  </div>
+
+                  <dl className="flex-1 space-y-3 text-sm">
+                    <div>
+                      <dt className="text-gray-400">Date</dt>
+                      <dd className="text-white">{dateStr}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-gray-400">Amount</dt>
+                      <dd className="text-white">{amountEth} ETH</dd>
+                    </div>
+                  </dl>
+
+                  {statusFilter === 0 && (
+                    <button
+                      onClick={() => handleCancel(p)}
+                      className="mt-6 w-full py-2 bg-red-600 hover:bg-red-700 rounded-lg font-medium transition"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Pagination */}
+        <div className="flex justify-between items-center mt-8">
+          <button
+            onClick={() => setOffset((o) => Math.max(0, o - limit))}
+            disabled={offset === 0}
+            className="px-4 py-2 rounded-lg bg-[#1a1725] hover:bg-[#2a2635] disabled:opacity-50 transition"
+          >
+            Prev
+          </button>
+          <button
+            onClick={() => setOffset((o) => o + limit)}
+            className="px-4 py-2 rounded-lg bg-[#1a1725] hover:bg-[#2a2635] transition"
+          >
+            Next
+          </button>
+        </div>
+      </>
+      )}
+
+      {modalMessage && <AlertModal message={modalMessage} onClose={() => setModalMessage(null)} />}
+    </div>
+  )
+}

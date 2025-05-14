@@ -36,8 +36,10 @@ import {
   linea, metis, moonbeam, neonMainnet, polygonZkEvm, sonic, tron, zksync,
   baseSepolia, monadTestnet
 } from "wagmi/chains";
+import ScheduleScreen from "./components/ScheduleScreen";
+import EarnScreen from "./components/EarnScreen";
 
-export type WarpView = "home" | "send" | "request" | "airdrop" | "history" | "scheduled";
+export type WarpView = "home" | "send" | "request" | "airdrop" | "schedule" | "history"  | "earn" ;
 
 const chainOptions = [
   //{ label: "Sepolia", chain: baseSepolia },
@@ -414,9 +416,12 @@ export default function Page(): JSX.Element {
           {warpView === "send" && <SendScreen address={address} onBack={handleBack} />}
           {warpView === "request" && <RequestScreen address={address} onBack={handleBack} />}
           {warpView === "airdrop" && <AirdropScreen address={address} onBack={handleBack} />}
-          {warpView === "history" && <HistoryScreen address={address} onBack={handleBack} />}
+          {warpView === "schedule" && <ScheduleScreen onBack={handleBack} />}
+          {warpView === "earn" && <EarnScreen onBack={handleBack} />}
+          
         </main>
       </div>
     </div>
   );
 }
+//{warpView === "history" && <HistoryScreen address={address} onBack={handleBack} />}
