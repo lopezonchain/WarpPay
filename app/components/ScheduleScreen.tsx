@@ -281,7 +281,7 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
               value={recipient}
               onChange={e => setRecipient(e.target.value)}
               className="w-full p-3 rounded-lg bg-[#1a1725] placeholder-gray-500"
-              placeholder="Wallet or ENS"
+              placeholder="Recipient wallet or ENS"
             />
           </div>
 
