@@ -157,9 +157,9 @@ export default function EarnScreen({ onBack }: { onBack: () => void }) {
             <div className="w-full max-w-md bg-gradient-to-r from-purple-700 to-purple-500 p-5 rounded-2xl shadow-xl mb-8">
                 <h3 className="text-xl font-semibold text-white mb-3">How does this work?</h3>
                 <ol className="list-decimal list-inside space-y-1 text-sm text-gray-200">
-                    <li>Add the WarpPay app (with notifications enabled).</li>
+                    <li>Add WarpPay to your miniapps in the upper right corner button, with notifications!!</li>
                     <li>
-                        When you receive a notification, open the app and be the first executing the payment within
+                        When you receive a notification about a payment, open the app and be the first executing it within
                         <span className="font-bold text-white"> 15 minutes </span>before it’s auto-executed.
                     </li>
                     <li>Enjoy your <span className="text-green-400 font-bold">1% reward</span>!</li>
