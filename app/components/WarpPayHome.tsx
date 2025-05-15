@@ -25,55 +25,55 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
     enabled: boolean;
     fee: number;
   }[] = [
-    {
-      icon: <FiTrendingUp />,
-      label: "Earn",
-      desc: "Excute payments before the automatic execution, get 1%",
-      action: "earn",
-      enabled: false,
-      fee: 0,
-    },
-    {
-      icon: <FiSend />,
-      label: "Send",
-      desc: "Instantly send any currency to any wallet, ENS or Basename",
-      action: "send",
-      enabled: true,
-      fee: 0,
-    },
-    {
-      icon: <FiDollarSign />,
-      label: "Request",
-      desc: "Generate a payment request link that anyone can fulfill.",
-      action: "request",
-      enabled: true,
-      fee: 0,
-    },
-    {
-      icon: <FiGift />,
-      label: "Airdrop",
-      desc: "Distribute tokens to multiple addresses at once, saving time and gas fees.",
-      action: "airdrop",
-      enabled: true,
-      fee: 2,
-    },
-    {
-      icon: <FiClock />,
-      label: "Scheduler",
-      desc: "Schedule one-time or recurring payments.",
-      action: "schedule",
-      enabled: true,
-      fee: 3,
-    },
-    {
-      icon: <FiBookOpen />,
-      label: "History",
-      desc: "View your past payments.",
-      action: "history",
-      enabled: false,
-      fee: 0,
-    },
-  ];
+      {
+        icon: <FiTrendingUp />,
+        label: "Earn",
+        desc: "Excute payments before the automatic execution, get 1%",
+        action: "earn",
+        enabled: false,
+        fee: 0,
+      },
+      {
+        icon: <FiSend />,
+        label: "Send",
+        desc: "Instantly send any currency to any wallet, ENS or Basename",
+        action: "send",
+        enabled: true,
+        fee: 0,
+      },
+      {
+        icon: <FiDollarSign />,
+        label: "Request",
+        desc: "Generate a payment request link that anyone can fulfill.",
+        action: "request",
+        enabled: true,
+        fee: 0,
+      },
+      {
+        icon: <FiGift />,
+        label: "Airdrop",
+        desc: "Distribute tokens to multiple addresses at once, saving time and gas fees.",
+        action: "airdrop",
+        enabled: true,
+        fee: 2,
+      },
+      {
+        icon: <FiClock />,
+        label: "Scheduler",
+        desc: "Schedule one-time or recurring payments.",
+        action: "schedule",
+        enabled: true,
+        fee: 3,
+      },
+      {
+        icon: <FiBookOpen />,
+        label: "History",
+        desc: "View your past payments.",
+        action: "history",
+        enabled: false,
+        fee: 0,
+      },
+    ];
 
   return (
     <div className="bg-[#0f0d14] text-white px-4 py-6 flex flex-col items-center w-full">
@@ -98,10 +98,9 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
               className={`
                 relative w-full rounded-2xl px-5 py-4 text-left transition-shadow
                 ${enabled ? "shadow-md hover:shadow-xl" : "opacity-50 cursor-not-allowed"}
-                ${
-                  isEarn
-                    ? "bg-yellow-500 hover:bg-yellow-400 text-black font-extrabold transform hover:scale-105"
-                    : enabled
+                ${isEarn
+                  ? "bg-yellow-500 hover:bg-yellow-400 text-black font-extrabold transform hover:scale-105"
+                  : enabled
                     ? "bg-[#1a1725] hover:bg-[#2a2438] border border-[#2a2438] text-white"
                     : "bg-[#1a1725] border border-[#3a3448] text-gray-500"
                 }
@@ -110,9 +109,8 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
               {/* fee tag omit for Earn */}
               {!isEarn && action !== "history" && (
                 <span
-                  className={`absolute top-2 right-2 text-xs font-semibold px-2 py-0.5 rounded ${
-                    fee === 0 ? "bg-green-600 text-white" : "bg-green-800 text-white"
-                  }`}
+                  className={`absolute top-2 right-2 text-xs font-semibold px-2 py-0.5 rounded ${fee === 0 ? "bg-green-600 text-white" : "bg-green-800 text-white"
+                    }`}
                 >
                   {fee === 0 ? "FREE" : `${fee}% fee`}
                 </span>
@@ -128,6 +126,25 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
                 )}
               </div>
               {!isEarn && <div className="text-xs text-gray-400 pl-8">{desc}</div>}
+              {(action === "airdrop" || action === "schedule") ? (
+                <div>
+                  <img
+                    src="https://github.com/base/brand-kit/blob/main/logo/symbol/Base_Symbol_Blue.png?raw=true"
+                    alt="Base logo"
+                    className="absolute bottom-1 right-6 w-4 h-4 opacity-80"
+                  />
+                  <img
+                    src="https://cdn.prod.website-files.com/667c57e6f9254a4b6d914440/667d7104644c621965495f6e_LogoMark.svg"
+                    alt="Monad Testnet logo"
+                    className="absolute bottom-1 right-1 w-4 h-4 opacity-80"
+                  />
+                </div>
+              ) : (action === "send" || action === "request") ? (
+                <span className="absolute bottom-1 right-1 text-xs font-bold opacity-80">
+                  ALL
+                </span>
+              ) : null}
+
             </button>
           );
         })}
