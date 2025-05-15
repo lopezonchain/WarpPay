@@ -30,7 +30,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
         label: "Earn",
         desc: "Excute payments before the automatic execution, get 1%",
         action: "earn",
-        enabled: false,
+        enabled: true,
         fee: 0,
       },
       {

@@ -8,11 +8,31 @@
       "name": "WarpPay 💸",
       "version": "next",
       "iconUrl": "https://warppay.lopezonchain.xyz/WarpPayLogo.png",
-      "homeUrl": "https://warppay.lopezonchain.xyz",
       "imageUrl": "https://warppay.lopezonchain.xyz/WarpPayLogo.png",
       "buttonTitle": "Launch WarpPay",
       "splashImageUrl": "https://warppay.lopezonchain.xyz/WarpPayLogo.png",
       "splashBackgroundColor": "#17101f",
-      "webhookUrl": "https://warppay.lopezonchain.xyz/api/webhook"
+      "homeUrl": "https://warppay.lopezonchain.xyz",
+      "webhookUrl": "https://warppay.lopezonchain.xyz/api/webhook",
+      "subtitle": "Payments made simple, anywhere",
+      "description": "WarpPay 💸 is a fast and intuitive payment miniapp that helps users send and receive any coin in any way. Designed for smooth in-wallet experiences.",
+      "screenshotUrls": [
+        "https://warppay.lopezonchain.xyz/screen_1.png",
+        "https://warppay.lopezonchain.xyz/screen_2.png",
+        "https://warppay.lopezonchain.xyz/screen_3.png"
+      ],
+      "primaryCategory": "finance",
+      "tags": [
+        "payments",
+        "crypto",
+        "airdrop",
+        "miniapp",
+        "tips"
+      ],
+      "heroImageUrl": "https://warppay.lopezonchain.xyz/hero.png",
+      "tagline": "Send. Receive. WarpPay.",
+      "ogTitle": "WarpPay 💸 – Your all-in-one payments Miniapp",
+      "ogDescription": "A seamless way to send and receive crypto in multiple ways, directly from your social feeds or desktop browser.",
+      "ogImageUrl": "https://warppay.lopezonchain.xyz/hero.png"
     }
   }
