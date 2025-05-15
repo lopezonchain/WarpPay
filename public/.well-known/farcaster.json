@@ -14,8 +14,8 @@
       "splashBackgroundColor": "#17101f",
       "homeUrl": "https://warppay.lopezonchain.xyz",
       "webhookUrl": "https://warppay.lopezonchain.xyz/api/webhook",
-      "subtitle": "Payments of all kinds made easy, in Farcaster or browser",
-      "description": "WarpPay 💸 is a fast and intuitive payment miniapp that helps users send and receive any coin in any way. Designed for smooth in-wallet experiences.",
+      "subtitle": "All-in-one easy payments",
+      "description": "WarpPay is a fast and intuitive payment miniapp that helps users send and receive any coin in any way. Designed for smooth in-wallet experiences.",
       "screenshotUrls": [
         "https://warppay.lopezonchain.xyz/screen_1.png",
         "https://warppay.lopezonchain.xyz/screen_2.png",
@@ -31,8 +31,8 @@
       ],
       "heroImageUrl": "https://warppay.lopezonchain.xyz/hero.png",
       "tagline": "Send. Receive. WarpPay.",
-      "ogTitle": "WarpPay 💸 – Your all-in-one payments Miniapp",
-      "ogDescription": "A seamless way to send and receive crypto in multiple ways, directly from your social feeds or desktop browser.",
+      "ogTitle": "WarpPay – All-in-one payments",
+      "ogDescription": "Simple but useful payments utility, from your Farcaster or Coinbase feeds or desktop browser.",
       "ogImageUrl": "https://warppay.lopezonchain.xyz/hero.png"
     }
   }
