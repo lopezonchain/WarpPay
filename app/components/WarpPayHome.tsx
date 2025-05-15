@@ -36,7 +36,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
       {
         icon: <FiSend />,
         label: "Send",
-        desc: "Instantly send any currency to any wallet, ENS or Basename",
+        desc: "Instantly send any currency to any Farcaster user, wallet, ENS or Basename",
         action: "send",
         enabled: true,
         fee: 0,
@@ -44,7 +44,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
       {
         icon: <FiDollarSign />,
         label: "Request",
-        desc: "Generate a payment request link that anyone can fulfill.",
+        desc: "Generate feed integrated request links that anyone can fulfill anywhere",
         action: "request",
         enabled: true,
         fee: 0,
@@ -52,7 +52,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
       {
         icon: <FiGift />,
         label: "Airdrop",
-        desc: "Distribute tokens to multiple addresses at once, saving time and gas fees.",
+        desc: "Distribute tokens to multiple addresses at once, saving time and gas fees",
         action: "airdrop",
         enabled: true,
         fee: 2,
@@ -60,19 +60,11 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
       {
         icon: <FiClock />,
         label: "Scheduler",
-        desc: "Schedule one-time or recurring payments.",
+        desc: "Schedule one-time or recurring payments",
         action: "schedule",
         enabled: true,
         fee: 3,
-      },
-      {
-        icon: <FiBookOpen />,
-        label: "History",
-        desc: "View your past payments.",
-        action: "history",
-        enabled: false,
-        fee: 0,
-      },
+      }
     ];
 
   return (
@@ -83,7 +75,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
         <span className="text-3xl ml-2">💸</span>
       </div>
       <p className="text-sm text-gray-400 mb-6 text-center">
-        Easy Onchain Payments<br /> Farcaster and Coinbase Miniapp
+        Easy Onchain Payments<br /> Decentralized and Open Source Farcaster and Coinbase Miniapp
       </p>
 
       <div className="flex flex-col space-y-4 w-full max-w-md">
