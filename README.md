@@ -17,17 +17,18 @@
 
 ## 🚀 Features
 
-- **Farcaster & Coinbase Miniapp integration**  
-- **Cross-chain Multisend**: Send native coins & ERC-20 tokens in multiple EVM chains, supporting ENS names and Basenames
+- **Farcaster & Coinbase Miniapp, also available on Desktop browser**  
+- **Cross-chain, easy use**: Send native coins & ERC-20 tokens in multiple EVM chains, supporting Farcaster users, ENS, Basenames,
 - **Payment Request Links**: Generate shareable links, integrated with Farcaster & Coinbase feeds but usable everywhere
-- **🎁 Airdrop & Multisend**: Bulk distribution on Base network (initial release)  
+- **Airdrop / Multisend**: Bulk distribution on Base
+- **Scheduler**: Schedule one-time or recurring payments on Base
 
 ## 🔧 Tech Stack
 
 - **Frontend**: Next · React · TypeScript · Tailwind CSS  
 - **Smart Contracts**: Solidity ^0.8.20 · Hardhat · OpenZeppelin  
 - **Wallet Integration**: Onchainkit · wagmi · viem  
-- **APIs**: 
+- **APIs**: Farcaster
 
 ## 🏗️ Getting Started
 
@@ -35,7 +36,6 @@
 
 - Node.js v16+  
 - Yarn or npm  
-- A JSON-RPC endpoint URL (e.g., Base Mainnet, Ethereum, Polygon)  
 
 ### Installation
 
@@ -59,7 +59,8 @@ npm run dev
 - **Send**: Instant transfers with ENS and Basenames support.  
 - **Request**: Create & share payment links (Farcaster & Coinbase).  
 - **Airdrop**: Bulk multisend on Base.  
-- **Scheduled**: (Coming soon) One-time & recurring payments.  
+- **Scheduler**: One-time & recurring payments.  
+- **Earn**: Get 1% executing scheduled payments.  
 
 ## 🤝 Contributing
 
