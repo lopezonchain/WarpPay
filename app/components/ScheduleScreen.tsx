@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { FiArrowLeft } from 'react-icons/fi'
 import AlertModal from './AlertModal'
 import TokenSelector, { TokenOption } from './TokenSelector'
@@ -10,6 +10,8 @@ import contractAbi from '../services/contractAbi.json'
 import { getWarpPayContract, resolveRecipient } from '../services/contractService'
 import { scheduleCyclicPayment, schedulePayment, cancelActivePayment, cancelCyclicPayment } from '../services/contractService'
 import type { ScheduledPayment } from '../services/contractService'
+import SuccessModal from './SuccessModal'
+import { useAddFrame } from '@coinbase/onchainkit/minikit'
 
 type Tab = 'create' | 'manage'
 type Status = 0 | 1 | 2 // 0 = pending, 1 = executed, 2 = failed
@@ -43,6 +45,21 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
   const [payments, setPayments] = useState<ScheduledPayment[]>([])
   const [offset, setOffset] = useState(0)
   const limit = 10
+
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // Hook para añadir miniapp
+  const addFrame = useAddFrame();
+  const handleAddFrame = useCallback(async () => {
+    await addFrame();
+  }, [addFrame]);
+
+  // Handler para compartir en Warpcast vía URL
+  const handleShare = useCallback(() => {
+    const text = `Do you know WarpPay? The all-in-one payments miniapp by @lopezonchain.eth 🚀 warppay.lopezonchain.xyz `;
+    const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank");
+  }, []);
 
   // Detect chainId
   useEffect(() => {
@@ -162,7 +179,8 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
         )
       }
 
-      setModalMessage(`Transaction submitted: ${tx.hash}`)
+      setModalMessage(null);
+      setShowSuccess(true);
       // reset form
       setRecipient('')
       setAmount('')
@@ -280,7 +298,7 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
               value={recipient}
               onChange={e => setRecipient(e.target.value)}
               className="w-full p-3 rounded-lg bg-[#1a1725] placeholder-gray-500"
-              placeholder="Recipient wallet or ENS"
+              placeholder="Recipient (wallet, ENS, Farcaster user)"
             />
           </div>
 
@@ -462,6 +480,14 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
       )}
 
       {modalMessage && <AlertModal message={modalMessage} onClose={() => setModalMessage(null)} />}
+        {/* Modal de éxito en la parte baja */}
+      {showSuccess && (
+        <SuccessModal
+          onClose={() => setShowSuccess(false)}
+          onShare={handleShare}
+          onAdd={handleAddFrame}
+        />
+      )}
     </div>
   )
 }

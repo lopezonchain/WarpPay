@@ -1,14 +1,16 @@
 // src/components/SendScreen.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FiArrowLeft, FiCompass } from "react-icons/fi";
 import AlertModal from "./AlertModal";
+import SuccessModal from "./SuccessModal";
 import { sendTokens } from "../services/contractService";
 import { useWalletClient, usePublicClient, useAccount } from "wagmi";
 import { useSearchParams } from "next/navigation";
 import { parseUnits, parseEther } from "viem";
 import TokenSelector, { TokenOption } from "./TokenSelector";
+import { useAddFrame } from '@coinbase/onchainkit/minikit'
 
 interface SendScreenProps {
   address?: `0x${string}`;
@@ -33,13 +35,28 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
 
   const searchParams = useSearchParams();
   const isPayment = !!searchParams.get("wallet");
+
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
   const [selectedToken, setSelectedToken] = useState<TokenOption>("ETH");
   const [contractAddress, setContractAddress] = useState("");
   const [modalMessage, setModalMessage] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  // Pre-fill from URL
+  // Hook para añadir miniapp
+  const addFrame = useAddFrame();
+  const handleAddFrame = useCallback(async () => {
+    await addFrame();
+  }, [addFrame]);
+
+  // Handler para compartir en Warpcast vía URL
+  const handleShare = useCallback(() => {
+    const text = `Do you know WarpPay? The all-in-one payments miniapp by @lopezonchain.eth 🚀 warppay.lopezonchain.xyz `;
+    const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank");
+  }, []);
+
+  // Pre-fill from URL params
   useEffect(() => {
     const w = searchParams.get("wallet");
     const a = searchParams.get("amount");
@@ -48,14 +65,12 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
     if (w) setTo(w);
     if (a) setAmount(a);
     if (t === "USDC") {
-      // Selecting USDC triggers TokenSelector effect to set the proper address
       setSelectedToken("USDC");
     } else if (t && t !== "ETH") {
       setSelectedToken("CUSTOM");
       if (c) setContractAddress(c);
     }
   }, [searchParams]);
-
 
   const getTokenType = () => (selectedToken === "ETH" ? "ETH" : "ERC20");
 
@@ -73,28 +88,28 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
         const value = parseEther(amount);
         const tx = await sendTokens(walletClient, to, value);
         await publicClient.waitForTransactionReceipt({ hash: tx.hash as `0x${string}` });
-        setModalMessage(`Sent: ${tx.summary}`);
       } else {
         // ERC20 flow
-        const addr = contractAddress;
-        if (!addr) {
+        if (!contractAddress) {
           setModalMessage("Missing token contract address");
           return;
         }
         setModalMessage("Reading token decimals...");
         const decimals = (await publicClient.readContract({
-          address: addr as `0x${string}`,
+          address: contractAddress as `0x${string}`,
           abi: ERC20_ABI,
           functionName: "decimals",
         })) as number;
 
         const parsed = parseUnits(amount, decimals);
-
         setModalMessage("Sending tokens...");
-        const tx = await sendTokens(walletClient, to, parsed, addr as `0x${string}`);
+        const tx = await sendTokens(walletClient, to, parsed, contractAddress as `0x${string}`);
         await publicClient.waitForTransactionReceipt({ hash: tx.hash as `0x${string}` });
-        setModalMessage(`Sent: ${tx.summary}`);
       }
+
+      // Al completarse con éxito, mostramos el SuccessModal
+      setModalMessage(null);
+      setShowSuccess(true);
     } catch (err) {
       setModalMessage(`Error: ${(err as Error).message}`);
     }
@@ -154,10 +169,17 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
         </button>
       </div>
 
-      {modalMessage && (
-        <AlertModal
-          message={modalMessage}
-          onClose={() => setModalMessage(null)}
+      {/* Modal de error/transición */}
+      {modalMessage && !showSuccess && (
+        <AlertModal message={modalMessage} onClose={() => setModalMessage(null)} />
+      )}
+
+      {/* Modal de éxito en la parte baja */}
+      {showSuccess && (
+        <SuccessModal
+          onClose={() => setShowSuccess(false)}
+          onShare={handleShare}
+          onAdd={handleAddFrame}
         />
       )}
     </div>

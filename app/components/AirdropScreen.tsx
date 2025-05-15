@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import AlertModal from "./AlertModal";
 import TokenSelector, { TokenOption } from "./TokenSelector";
@@ -9,6 +9,8 @@ import { createAirdrop, resolveRecipient } from "../services/contractService";
 import { parseEther, parseUnits } from "viem";
 import { PrimaryAddressResult, WarpcastService, WarpcastUser } from "../services/warpcastService";
 import sdk, { type Context } from "@farcaster/frame-sdk";
+import SuccessModal from "./SuccessModal";
+import { useAddFrame } from '@coinbase/onchainkit/minikit'
 
 const warpcast = new WarpcastService();
 
@@ -53,6 +55,20 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
   const [manualRows, setManualRows] = useState<{ addr: string; amt: string }[]>([{ addr: "", amt: "" }]);
   const [csvText, setCsvText] = useState("");
   const [modalMessage, setModalMessage] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // Hook para añadir miniapp
+  const addFrame = useAddFrame();
+  const handleAddFrame = useCallback(async () => {
+    await addFrame();
+  }, [addFrame]);
+
+  // Handler para compartir en Warpcast vía URL
+  const handleShare = useCallback(() => {
+    const text = `Do you know WarpPay? The all-in-one payments miniapp by @lopezonchain.eth 🚀 warppay.lopezonchain.xyz `;
+    const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank");
+  }, []);
 
   // Preload all data once
   useEffect(() => {
@@ -110,7 +126,6 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
     }
     setSelectedFids(pool.slice(0, autoCount).map(u => u.fid));
   };
-
 
   // Amount parser
   async function parseAmount(amt: string) {
@@ -200,7 +215,8 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
       }
       setModalMessage("Multisending…");
       const tx = await createAirdrop(walletClient, publicClient, tokenAddress, recipients, values);
-      setModalMessage(`Airdrop TX submitted: ${tx.hash}`);
+      setModalMessage(null);
+      setShowSuccess(true);
     } catch (err) {
       setModalMessage(`Error: ${(err as Error).message}`);
     }
@@ -369,8 +385,8 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
                     <label
                       key={user.fid}
                       className={`relative overflow-hidden flex flex-col justify-end p-4 h-32 rounded-3xl cursor-pointer bg-cover bg-center shadow-lg transition-transform transform border-2 ${isSelected
-                          ? 'border-purple-500 scale-105'
-                          : 'border-transparent'
+                        ? 'border-purple-500 scale-105'
+                        : 'border-transparent'
                         } hover:scale-[1.02]`}
                       style={{ backgroundImage: `url(${user.pfp?.url})` }}
                     >
@@ -503,6 +519,14 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
       )}
 
       {modalMessage && <AlertModal message={modalMessage} onClose={() => setModalMessage(null)} />}
+      {/* Modal de éxito en la parte baja */}
+      {showSuccess && (
+        <SuccessModal
+          onClose={() => setShowSuccess(false)}
+          onShare={handleShare}
+          onAdd={handleAddFrame}
+        />
+      )}
     </div>
   );
 };
