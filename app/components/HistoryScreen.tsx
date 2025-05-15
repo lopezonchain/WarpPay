@@ -88,21 +88,19 @@ export default function HistoryScreen({
             const isWarpPay =
               warpPayAddress != null &&
               (tx.hash.toLowerCase().includes(warpPayAddress) ||
-               tx.summary.toLowerCase().includes(warpPayAddress))
+                tx.summary.toLowerCase().includes(warpPayAddress))
             return (
               <li
                 key={idx}
-                className={`p-4 rounded-lg flex flex-col space-y-1 ${
-                  isWarpPay
+                className={`p-4 rounded-lg flex flex-col space-y-1 ${isWarpPay
                     ? 'bg-purple-700 border-l-4 border-purple-400'
                     : 'bg-[#1a1725]'
-                }`}
+                  }`}
               >
                 <div className="flex justify-between items-center">
                   <span
-                    className={`text-sm font-semibold ${
-                      isWarpPay ? 'text-yellow-300' : 'text-white'
-                    }`}
+                    className={`text-sm font-semibold ${isWarpPay ? 'text-yellow-300' : 'text-white'
+                      }`}
                   >
                     {isWarpPay ? 'WarpPay' : 'Standard'}
                   </span>

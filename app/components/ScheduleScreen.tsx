@@ -73,29 +73,29 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
 
   // Fetch schedules when in Manage tab or filters change
   useEffect(() => {
-  if (tab !== 'manage' || !walletClient || !publicClient) return;
-  (async () => {
-    try {
-      const raw = await publicClient.readContract({
-        address: getWarpPayContract(chainId),
-        abi: contractAbi,
-        functionName: 'getPaymentsByStatus',
-        args: [statusFilter, BigInt(offset), BigInt(limit)],
-      }) as ScheduledPayment[];
+    if (tab !== 'manage' || !walletClient || !publicClient) return;
+    (async () => {
+      try {
+        const raw = await publicClient.readContract({
+          address: getWarpPayContract(chainId),
+          abi: contractAbi,
+          functionName: 'getPaymentsByStatus',
+          args: [statusFilter, BigInt(offset), BigInt(limit)],
+        }) as ScheduledPayment[];
 
-      // empacamos con su id real = offset + posición
-      const withIds = raw.map((p, i) => ({
-        ...p,
-        _id: BigInt(offset + i),
-      }));
+        // empacamos con su id real = offset + posición
+        const withIds = raw.map((p, i) => ({
+          ...p,
+          _id: BigInt(offset + i),
+        }));
 
-      setPayments(withIds);
-    } catch (e) {
-      console.error('Error fetching payments', e);
-      setModalMessage('Failed to load scheduled payments');
-    }
-  })();
-}, [tab, statusFilter, offset, walletClient, publicClient, chainId]);
+        setPayments(withIds);
+      } catch (e) {
+        console.error('Error fetching payments', e);
+        setModalMessage('Failed to load scheduled payments');
+      }
+    })();
+  }, [tab, statusFilter, offset, walletClient, publicClient, chainId]);
 
   // Parse user-entered amount
   async function parseAmount(amt: string) {
@@ -193,34 +193,34 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
       setModalMessage(`Error: ${err.message || err}`)
     }
   }
-  
+
   // Handle schedule cancellation
   const handleCancel = async (id: bigint, cyclicId: bigint) => {
-  if (!walletClient) return;
-  try {
-    setModalMessage('Cancelling schedule…');
+    if (!walletClient) return;
+    try {
+      setModalMessage('Cancelling schedule…');
 
-    let tx;
-    if (cyclicId !== BigInt(0)) {
-      tx = await cancelCyclicPayment(walletClient, cyclicId);
-    } else {
-      tx = await cancelActivePayment(walletClient, id);
+      let tx;
+      if (cyclicId !== BigInt(0)) {
+        tx = await cancelCyclicPayment(walletClient, cyclicId);
+      } else {
+        tx = await cancelActivePayment(walletClient, id);
+      }
+
+      setModalMessage(`Schedule cancelled: ${tx.hash}`);
+      // refetch
+      const refreshed = await publicClient?.readContract({
+        address: getWarpPayContract(chainId),
+        abi: contractAbi,
+        functionName: 'getPaymentsByStatus',
+        args: [statusFilter, BigInt(offset), BigInt(limit)],
+      }) as ScheduledPayment[];
+      setPayments(refreshed);
+    } catch (e: any) {
+      console.error('Error cancelling', e);
+      setModalMessage(`Error cancelling: ${e.message}`);
     }
-
-    setModalMessage(`Schedule cancelled: ${tx.hash}`);
-    // refetch
-    const refreshed = await publicClient?.readContract({
-      address: getWarpPayContract(chainId),
-      abi: contractAbi,
-      functionName: 'getPaymentsByStatus',
-      args: [statusFilter, BigInt(offset), BigInt(limit)],
-    }) as ScheduledPayment[];
-    setPayments(refreshed);
-  } catch (e: any) {
-    console.error('Error cancelling', e);
-    setModalMessage(`Error cancelling: ${e.message}`);
-  }
-};
+  };
 
   // Unsupported network message
   if (chainId && chainId !== 8453 && chainId !== 10143) {
@@ -253,17 +253,15 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
       <div className="flex space-x-4 mb-8">
         <button
           onClick={() => setTab('create')}
-          className={`px-5 py-2 rounded-xl font-medium ${
-            tab === 'create' ? 'bg-purple-600' : 'bg-[#1a1725]'
-          }`}
+          className={`px-5 py-2 rounded-xl font-medium ${tab === 'create' ? 'bg-purple-600' : 'bg-[#1a1725]'
+            }`}
         >
           Create
         </button>
         <button
           onClick={() => setTab('manage')}
-          className={`px-5 py-2 rounded-xl font-medium ${
-            tab === 'manage' ? 'bg-purple-600' : 'bg-[#1a1725]'
-          }`}
+          className={`px-5 py-2 rounded-xl font-medium ${tab === 'manage' ? 'bg-purple-600' : 'bg-[#1a1725]'
+            }`}
         >
           Manage
         </button>
@@ -275,17 +273,15 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
           <div className="flex space-x-2">
             <button
               onClick={() => setIsCyclic(false)}
-              className={`flex-1 py-2 rounded-lg ${
-                !isCyclic ? 'bg-purple-500' : 'bg-[#1a1725]'
-              }`}
+              className={`flex-1 py-2 rounded-lg ${!isCyclic ? 'bg-purple-500' : 'bg-[#1a1725]'
+                }`}
             >
               One-Time
             </button>
             <button
               onClick={() => setIsCyclic(true)}
-              className={`flex-1 py-2 rounded-lg ${
-                isCyclic ? 'bg-purple-500' : 'bg-[#1a1725]'
-              }`}
+              className={`flex-1 py-2 rounded-lg ${isCyclic ? 'bg-purple-500' : 'bg-[#1a1725]'
+                }`}
             >
               Cyclic
             </button>
@@ -351,9 +347,8 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
                     <button
                       key={u}
                       onClick={() => setIntervalUnit(u)}
-                      className={`flex-1 py-2 rounded-lg text-sm ${
-                        intervalUnit === u ? 'bg-purple-500' : 'bg-[#1a1725]'
-                      }`}
+                      className={`flex-1 py-2 rounded-lg text-sm ${intervalUnit === u ? 'bg-purple-500' : 'bg-[#1a1725]'
+                        }`}
                     >
                       {u.charAt(0).toUpperCase() + u.slice(1)}
                     </button>
@@ -388,11 +383,10 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
               <button
                 key={s}
                 onClick={() => { setStatusFilter(s); setOffset(0) }}
-                className={`px-2 py-1 rounded-full font-medium transition ${
-                  statusFilter === s
+                className={`px-2 py-1 rounded-full font-medium transition ${statusFilter === s
                     ? 'bg-purple-500 hover:bg-purple-400'
                     : 'bg-[#1a1725] hover:bg-[#2a2635]'
-                }`}
+                  }`}
               >
                 {s === 0 ? 'Pending' : s === 1 ? 'Executed' : 'Failed'}
               </button>
@@ -422,10 +416,9 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
                       <span title={p.recipient} className="text-sm font-medium text-gray-300">
                         Recipient: {shortAddr}
                       </span>
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          status === 'Pending'
-                            ? 'bg-yellow-500'
-                            : status === 'Executed'
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${status === 'Pending'
+                          ? 'bg-yellow-500'
+                          : status === 'Executed'
                             ? 'bg-green-500'
                             : 'bg-red-500'
                         }`}>
@@ -480,7 +473,7 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
       )}
 
       {modalMessage && <AlertModal message={modalMessage} onClose={() => setModalMessage(null)} />}
-        {/* Modal de éxito en la parte baja */}
+      {/* Modal de éxito en la parte baja */}
       {showSuccess && (
         <SuccessModal
           onClose={() => setShowSuccess(false)}
