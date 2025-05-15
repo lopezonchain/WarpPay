@@ -3,13 +3,11 @@ export interface WarpcastUser {
     fid: number;
     displayName: string;
     profile: {
-      
       bio: { text: string; mentions: any[] };
       channelMentions: any[];
       location: { placeId: string; description: string };
       description: string;
       earlyWalletAdopter: boolean;
-      
     };
     username: string;
     followerCount: number;
@@ -24,7 +22,7 @@ export interface WarpcastUser {
     };
   }
 
-  export interface PrimaryAddressResult {
+export interface PrimaryAddressResult {
     fid: number;
     success: boolean;
     address?: {
@@ -38,8 +36,6 @@ export interface PaginatedUsers {
     users: WarpcastUser[];
     nextCursor?: string;
 }
-
-// src/services/warpcastService.ts
 
 export class WarpcastService {
     // Apuntamos al proxy interno de Next.js para evitar CORS
@@ -112,6 +108,23 @@ export class WarpcastService {
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       const json = (await res.json()) as { result: { addresses: PrimaryAddressResult[] } };
       return json.result.addresses;
+    }
+  
+    /** Resuelve un fname de Farcaster al FID actual */
+    async getFidByName(
+      name: string
+    ): Promise<number> {
+      // Quitamos posible '@' para flexibilidad
+      const clean = name.replace(/^@/, '');
+      const url = `https://fnames.farcaster.xyz/transfers?name=${encodeURIComponent(clean)}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`FName API error: ${res.status}`);
+      const json = await res.json() as { transfers: Array<{ to: number }> };
+      if (json.transfers.length === 0) {
+        throw new Error(`El nombre "${name}" no está registrado`);
+      }
+      // El primer registro es la asignación original al FID
+      return json.transfers[0].to;
     }
   
     /** Helper: recorre todas las páginas hasta que nextCursor sea undefined */

@@ -5,10 +5,9 @@ import { FiArrowLeft } from 'react-icons/fi'
 import AlertModal from './AlertModal'
 import TokenSelector, { TokenOption } from './TokenSelector'
 import { useWalletClient, usePublicClient } from 'wagmi'
-import { parseEther, parseUnits, encodeFunctionData } from 'viem'
+import { parseEther, parseUnits } from 'viem'
 import contractAbi from '../services/contractAbi.json'
-import { getWarpPayContract } from '../services/contractService'
-import { resolveEnsName } from '../services/ensResolver'
+import { getWarpPayContract, resolveRecipient } from '../services/contractService'
 import { scheduleCyclicPayment, schedulePayment, cancelActivePayment, cancelCyclicPayment } from '../services/contractService'
 import type { ScheduledPayment } from '../services/contractService'
 
@@ -129,7 +128,7 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
       setModalMessage('Resolving recipient…')
       const to = recipient.startsWith('0x')
         ? (recipient as `0x${string}`)
-        : await resolveEnsName(recipient)
+        : await resolveRecipient(recipient)
 
       setModalMessage('Preparing transaction…')
       const baseAmount = await parseAmount(amount)

@@ -5,8 +5,7 @@ import { FiArrowLeft } from "react-icons/fi";
 import AlertModal from "./AlertModal";
 import TokenSelector, { TokenOption } from "./TokenSelector";
 import { useWalletClient, usePublicClient } from "wagmi";
-import { resolveEnsName } from "../services/ensResolver";
-import { createAirdrop } from "../services/contractService";
+import { createAirdrop, resolveRecipient } from "../services/contractService";
 import { parseEther, parseUnits } from "viem";
 import { PrimaryAddressResult, WarpcastService, WarpcastUser } from "../services/warpcastService";
 import sdk, { type Context } from "@farcaster/frame-sdk";
@@ -172,7 +171,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
         }
         for (const { addr, amt } of manualRows) {
           if (!addr) continue;
-          const resolved = addr.startsWith("0x") ? (addr as `0x${string}`) : await resolveEnsName(addr);
+          const resolved = addr.startsWith("0x") ? (addr as `0x${string}`) : await resolveRecipient(addr);
           const amountStr = useSameAmount ? amountPerRecipient : amt;
           if (!amountStr) continue;
           recipients.push(resolved);
@@ -189,7 +188,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
           const addr = addrPart.trim();
           const amt = useSameAmount ? amountPerRecipient : (amtPart?.trim() ?? "");
           if (!addr || !amt) continue;
-          const resolved = addr.startsWith("0x") ? (addr as `0x${string}`) : await resolveEnsName(addr);
+          const resolved = addr.startsWith("0x") ? (addr as `0x${string}`) : await resolveRecipient(addr);
           recipients.push(resolved);
           values.push(await parseAmount(amt));
         }
