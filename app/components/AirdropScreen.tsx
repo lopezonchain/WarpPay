@@ -359,7 +359,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
 
             {filteredList.length === 0 ? (
               <p className="w-full text-center text-gray-500">
-                Open in Warpcast to get data
+                Open in Farcaster to get data
               </p>
             ) : (
               <div className="grid grid-cols-2 gap-2">
@@ -447,7 +447,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
               <div key={i} className="flex space-x-2 mb-2 w-full">
                 <input
                   type="text"
-                  placeholder="Address / ENS"
+                  placeholder="Address / ENS / Farcaster user"
                   className="flex-1 p-2 rounded-lg bg-[#1a1725] text-white"
                   value={row.addr}
                   onChange={e => setManualRows(r => r.map((x, j) => j === i ? { ...x, addr: e.target.value } : x))}
@@ -484,7 +484,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
                 onChange={e => setAmountPerRecipient(e.target.value)}
               />)}
             <textarea
-              placeholder={useSameAmount ? "One recipient address or ens per line" : "recipient,amount per line"}
+              placeholder={useSameAmount ? "One recipient wallet, ENS or Farcaster user per line" : "recipient,amount per line"}
               className="w-full h-40 p-3 rounded-lg bg-[#1a1725] text-white"
               value={csvText}
               onChange={e => setCsvText(e.target.value)}
