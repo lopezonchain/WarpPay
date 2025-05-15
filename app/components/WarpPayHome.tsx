@@ -126,7 +126,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
                 )}
               </div>
               {!isEarn && <div className="text-xs text-gray-400 pl-8">{desc}</div>}
-              {(action === "airdrop" || action === "schedule") ? (
+              {(action === "airdrop" || action === "schedule" || action === "earn") ? (
                 <div>
                   <img
                     src="https://github.com/base/brand-kit/blob/main/logo/symbol/Base_Symbol_Blue.png?raw=true"
