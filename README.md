@@ -56,10 +56,10 @@ npm run dev
 
 ## 📈 Usage
 
-- **Send**: Instant transfers with ENS and Basenames support.  
-- **Request**: Create & share payment links (Farcaster & Coinbase).  
-- **Airdrop**: Bulk multisend on Base.  
-- **Scheduler**: One-time & recurring payments.  
+- **Send**: Instant transfers with Farcaster users, wallets, ENS and Basenames support.  
+- **Request**: Create & share payment links that work everywhere.
+- **Airdrop**: Bulk multisend, easy to airdrop Farcaster friends. 
+- **Scheduler**: Scheduled one-time & recurring payments.
 - **Earn**: Get 1% executing scheduled payments.  
 
 ## 🤝 Contributing
