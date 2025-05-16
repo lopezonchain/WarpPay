@@ -60,7 +60,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ onClose, onShare, onAdd }) 
                     className="flex-1 py-3 border border-gray-300 hover:border-gray-400 rounded-lg font-medium flex items-center justify-center gap-2 transition"
                 >
                     <FiPlus size={20} />
-                    Add Miniapp
+                    Save Miniapp
                 </button>
             </div>
         </div>

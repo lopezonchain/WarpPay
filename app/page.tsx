@@ -11,7 +11,7 @@ export async function generateMetadata({ searchParams }: { searchParams: { [key:
   const reason    = searchParams.reason;
   const isPayment = wallet && amount;
 
-  const reasonText = reason ? ` for ${reason}` : "";
+  const reasonText = reason ? ` ${reason}` : "";
 
   const formattedAmount = amount ? `${amount} ${token}` : "";
   const shortWallet     = wallet ? `${wallet.slice(0, 6)}...${wallet.slice(-4)}` : "";
