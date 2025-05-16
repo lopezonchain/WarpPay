@@ -288,13 +288,13 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
           </div>
 
           <div className="space-y-4">
-            <label className="block text-sm font-medium">Recipient (address or ENS)</label>
+            <label className="block text-sm font-medium">Recipient</label>
             <input
               type="text"
               value={recipient}
               onChange={e => setRecipient(e.target.value)}
               className="w-full p-3 rounded-lg bg-[#1a1725] placeholder-gray-500"
-              placeholder="Recipient (wallet, ENS, Farcaster user)"
+              placeholder="Wallet, ENS/Basename or Farcaster user"
             />
           </div>
 

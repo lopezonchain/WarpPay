@@ -1,7 +1,7 @@
 // src/components/WarpPayHome.tsx
 "use client";
 
-import React from "react";
+import React, { useCallback } from "react";
 import {
   FiSend,
   FiDollarSign,
@@ -9,6 +9,7 @@ import {
   FiClock,
   FiBookOpen,
   FiTrendingUp,
+  FiAirplay
 } from "react-icons/fi";
 import { WarpView } from "../page-client";
 
@@ -36,7 +37,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
       {
         icon: <FiSend />,
         label: "Send",
-        desc: "Instantly send any currency to any Farcaster user, wallet, ENS or Basename",
+        desc: "Instantly send any currency to any Farcaster user, wallet, ENS or Basename, completely FREE!",
         action: "send",
         enabled: true,
         fee: 0,
@@ -44,7 +45,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
       {
         icon: <FiDollarSign />,
         label: "Request",
-        desc: "Generate feed integrated request links that anyone can fulfill anywhere",
+        desc: "Generate feed integrated request links that anyone can fulfill, anywhere, with just couple clicks!!",
         action: "request",
         enabled: true,
         fee: 0,
@@ -52,7 +53,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
       {
         icon: <FiGift />,
         label: "Airdrop",
-        desc: "Distribute tokens to multiple addresses at once, saving time and gas fees",
+        desc: "Distribute tokens to multiple addresses at once, saving time and gas fees. Seamlessly search and select your friends in Recommended mode (or randomize it a bit!!)",
         action: "airdrop",
         enabled: true,
         fee: 2,
@@ -60,7 +61,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
       {
         icon: <FiClock />,
         label: "Scheduler",
-        desc: "Schedule one-time or recurring payments",
+        desc: "Schedule one-time or recurring payments with our usual Farcaster names and ENS / Basenames support",
         action: "schedule",
         enabled: true,
         fee: 3,
@@ -74,6 +75,12 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
         fee: 0,
       },*/
     ];
+
+    const handleShare = useCallback(() => {
+      const text = `Do you know WarpPay?? The all-in-one payments miniapp by @lopezonchain.eth 🚀 Send anything, anywhere to anyone just with a farcaster name or ENS, create request links, airdrops, scheduled transfers, or even EARN! warppay.lopezonchain.xyz `;
+      const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
+      window.open(url, "_blank");
+    }, []);
 
   return (
     <div className="bg-[#0f0d14] text-white px-4 py-6 flex flex-col items-center w-full">
@@ -150,12 +157,20 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
         })}
       </div>
 
+      <button
+        onClick={handleShare}
+        className="flex justify-center items-center mt-6 w-full max-w-sm bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-t-lg text-center shadow-lg border-b transition"
+      >
+        <FiAirplay className="mr-2" /> Share WarpPay <FiAirplay className="ml-2" />
+      </button>
+
       <a
         href="?wallet=lopezonchain.eth&amount=0.01&token=ETH"
-        className="mt-6 w-full max-w-sm bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg text-center shadow-lg transition"
+        className="w-full max-w-sm bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-b-lg text-center shadow-lg transition"
       >
-        Support WarpPay 💜
+        💜💜 Support 💜💜
       </a>
+
 
       <footer className="mt-4 text-xs text-gray-500 text-center">
         <div>✦ Powered by Farcaster & Coinbase Minikit ✦</div>
