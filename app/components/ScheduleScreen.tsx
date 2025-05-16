@@ -56,7 +56,7 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
 
   // Handler para compartir en Warpcast vía URL
   const handleShare = useCallback(() => {
-    const text = `I've just created a scheduled transfer with WarpPay!! The all-in-one payments miniapp by @lopezonchain.eth 🚀 Send anything, anywhere to anyone just with a farcaster name or ENS, create request links, airdrops, or even EARN! warppay.lopezonchain.xyz `;
+    const text = `I've just created a scheduled transfer with WarpPay!! The all-in-one payments miniapp by @lopezonchain.eth 🚀 Send anything, anywhere to anyone just with a farcaster name or ENS, create request links, airdrops, or even EARN! https://warpcast.com/miniapps/V0727cQCBnfX/warppay- `;
     const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
     window.open(url, "_blank");
   }, []);

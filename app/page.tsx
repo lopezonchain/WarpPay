@@ -18,7 +18,7 @@ export async function generateMetadata({ searchParams }: { searchParams: { [key:
     title: isPayment ? `WarpPay me ${formattedAmount} 💸` : "WarpPay",
     description: isPayment
       ? `Send ${formattedAmount} to ${shortWallet}`
-      : "WarpPay. Easy payments of all kinds, in Warpcast or browser",
+      : "WarpPay. Easy payments of all kinds, in Farcaster or browser",
     other: {
       'fc:frame': JSON.stringify({
         version: "next",
