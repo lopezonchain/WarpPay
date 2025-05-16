@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import AlertModal from "./AlertModal";
 import TokenSelector, { TokenOption } from "./TokenSelector";
@@ -22,20 +22,10 @@ const RequestScreen: React.FC<RequestScreenProps> = ({ address, onBack }) => {
   const [modalMessage, setModalMessage] = useState<string | null>(null);
   const { data: walletClient } = useWalletClient();
 
-  /*useEffect(() => {
-    const a = searchParams.get("amount");
-    const t = searchParams.get("token");
-    const c = searchParams.get("contract");
-    const r = searchParams.get("reason");
-    if (a) setAmount(a);
-    if (r) setReason(r);
-    if (t === "USDC") {
-      setSelectedToken("USDC");
-    } else if (t && t !== "ETH") {
-      setSelectedToken("CUSTOM");
-      if (c) setContractAddress(c);
+  const handleShare = () => {
+      const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(link)}`;
+      window.open(url, "_blank");
     }
-  }, [searchParams]);  */
 
   const generateLink = () => {
     if (!address) {
@@ -123,6 +113,12 @@ const RequestScreen: React.FC<RequestScreenProps> = ({ address, onBack }) => {
               className="w-full py-4 rounded-2xl bg-blue-500 hover:bg-blue-600 text-lg font-bold"
             >
               Copy Link
+            </button>
+            <button
+              onClick={handleShare}
+              className="w-full py-4 rounded-2xl font-bold bg-purple-600 hover:bg-purple-700 text-lg"
+            >
+              Cast it!
             </button>
           </div>
         )}
