@@ -26,9 +26,9 @@
 ## 🔧 Tech Stack
 
 - **Frontend**: Next · React · TypeScript · Tailwind CSS  
-- **Smart Contracts**: Solidity ^0.8.20 · Hardhat · OpenZeppelin  
+- **Smart Contract**: Solidity ^0.8.20 · Hardhat · OpenZeppelin  
 - **Wallet Integration**: Onchainkit · wagmi · viem  
-- **APIs**: Farcaster
+- **APIs**: Farcaster · Moralis
 
 ## 🏗️ Getting Started
 
