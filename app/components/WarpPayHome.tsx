@@ -64,7 +64,15 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
         action: "schedule",
         enabled: true,
         fee: 3,
-      }
+      },
+      /*{
+        icon: <FiBookOpen />,
+        label: "History",
+        desc: "View your past payments",
+        action: "history",
+        enabled: false,
+        fee: 0,
+      },*/
     ];
 
   return (
@@ -75,7 +83,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
         <span className="text-3xl ml-2">💸</span>
       </div>
       <p className="text-sm text-gray-400 mb-6 text-center">
-        Easy Onchain Payments<br /> Decentralized and Open Source Farcaster and Coinbase Miniapp
+        Easy Onchain Payments<br /> Decentralized Farcaster Miniapp<br />
       </p>
 
       <div className="flex flex-col space-y-4 w-full max-w-md">
