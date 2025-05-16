@@ -87,7 +87,7 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
     }, []);
 
 return (
-    <div className="bg-[#0f0d14] text-white px-4 py-6 flex flex-col items-center w-full">
+    <div className="bg-[#0f0d14] text-white px-4 py-3 flex flex-col items-center w-full">
       {/* Header */}
       <div className="flex items-end mb-4">
         <h1 className="text-4xl font-bold">WarpPay</h1>
