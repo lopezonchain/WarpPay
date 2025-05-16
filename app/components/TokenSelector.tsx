@@ -39,7 +39,7 @@ interface TokenSelectorProps {
 // USDC contract per chain
 const USDC_ADDRESSES: Record<number, string> = {
   [mainnet.id]: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-  [base.id]:    '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+  [base.id]: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
   [monadTestnet.id]: '0xf817257fed379853cde0fa4f97ab987181b1e5ea'
 }
 
@@ -80,8 +80,11 @@ export default function TokenSelector({
     const loadTokens = async () => {
       setLoadingTokens(true)
       try {
+        // convierte el chainId decimal a hex string (e.g. 8453 → "0x2105")
+        const chainHex = `0x${chainId.toString(16)}`
+
         const res = await fetch(
-          `/api/token-balances?wallet=${walletAddress}&chainId=0x2105`
+          `/api/token-balances?wallet=${walletAddress}&chainId=${chainHex}`
         )
         if (!res.ok) {
           console.error(`Error fetching tokens: ${res.status} ${res.statusText}`)
@@ -101,9 +104,9 @@ export default function TokenSelector({
 
         const tokens = Array.isArray(raw)
           ? raw.map(t => ({
-              symbol: t.symbol,
-              token_address: t.token_address,
-            }))
+            symbol: t.symbol,
+            token_address: t.token_address,
+          }))
           : []
         setWalletTokens(tokens)
       } catch (err) {
@@ -130,8 +133,8 @@ export default function TokenSelector({
           const label = opt === 'ETH'
             ? ethLabel
             : opt === 'USDC'
-            ? 'USDC'
-            : 'Other'
+              ? 'USDC'
+              : 'Other'
 
           return (
             <button
