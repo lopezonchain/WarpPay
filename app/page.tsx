@@ -27,7 +27,7 @@ export async function generateMetadata({ searchParams }: { searchParams: { [key:
       "fc:frame": JSON.stringify({
         version: "next",
         imageUrl: isPayment
-          ? `https://warppay.lopezonchain.xyz/payment-frame.png`
+          ? "https://warppay.lopezonchain.xyz/payment-frame.png"
           : "https://warppay.lopezonchain.xyz/WarpPayLogo.png",
         button: {
           title: isPayment
