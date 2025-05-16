@@ -7,6 +7,7 @@ import { useWalletClient, usePublicClient } from 'wagmi'
 import { getWarpPayContract, executeSinglePayment } from '../services/contractService'
 import contractAbi from '../services/contractAbi.json'
 import type { ScheduledPayment } from '../services/contractService'
+import { FiChevronDown } from 'react-icons/fi'
 
 export default function EarnScreen({ onBack }: { onBack: () => void }) {
     const { data: walletClient } = useWalletClient()
@@ -18,6 +19,7 @@ export default function EarnScreen({ onBack }: { onBack: () => void }) {
     const [rewardEth, setRewardEth] = useState<string>('0.0000')
     const [modalMessage, setModalMessage] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+    const [open, setOpen] = useState(false)
 
     const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
     let payment: ScheduledPayment | undefined
@@ -154,17 +156,54 @@ export default function EarnScreen({ onBack }: { onBack: () => void }) {
             <h2 className="text-3xl font-bold mb-6">Earn</h2>
 
             {/* How does this work? – siempre visible */}
-            <div className="w-full max-w-md bg-gradient-to-r from-purple-700 to-purple-500 p-5 rounded-2xl shadow-xl mb-8 text-sm">
-                <h3 className="text-xl font-semibold text-white mb-3">How does this work?</h3>
-                <ol className="list-decimal list-inside space-y-1 text-lg text-gray-200">
-                    <li>Add WarpPay to your miniapps in the upper right corner button, with notifications!!</li>
-                    <li>
-                        When you receive a notification about a payment*, open the app and be the first executing it within
-                        <span className="font-bold text-white"> the timeline </span>.
-                    </li>
-                    <li>Enjoy your <span className="text-green-400 font-bold">1% reward</span>!</li>
-                </ol>
-                * Notifications are not implemented yet, stay tuned!
+            <div className="w-full max-w-md mb-8">
+                <button
+                    type="button"
+                    onClick={() => setOpen(o => !o)}
+                    className="
+          w-full
+          bg-gradient-to-r from-purple-700 to-purple-500
+          p-5 rounded-2xl shadow-xl
+          text-left
+          focus:outline-none
+        "
+                >
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-xl font-semibold text-white">
+                            How does this work?
+                        </h3>
+                        <FiChevronDown
+                            className={`
+              text-white transition-transform duration-200
+              ${open ? 'rotate-180' : 'rotate-0'}
+            `}
+                            size={24}
+                        />
+                    </div>
+
+                    {open && (
+                        <>
+                            <ol className="mt-4 list-decimal list-inside space-y-2 text-lg text-gray-200">
+                                <li>
+                                    Add WarpPay to your miniapps in the upper-right corner button,
+                                    with notifications!!
+                                </li>
+                                <li>
+                                    When you receive a notification about a payment*, open the app
+                                    and be the first executing it within{' '}
+                                    <span className="font-bold text-white">the timeline</span>.
+                                </li>
+                                <li>
+                                    Enjoy your{' '}
+                                    <span className="text-green-400 font-bold">1% reward</span>!
+                                </li>
+                            </ol>
+                            <p className="mt-2 text-sm text-gray-300">
+                                * Notifications are not implemented yet, stay tuned!
+                            </p>
+                        </>
+                    )}
+                </button>
             </div>
 
             {/* Pago pendiente (o mensaje de no hay) */}
@@ -213,7 +252,4 @@ export default function EarnScreen({ onBack }: { onBack: () => void }) {
             )}
         </div>
     )
-
-
-
 }
