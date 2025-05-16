@@ -146,7 +146,7 @@ export default function TokenSelector({
                   ">
                     <span className="truncate">
                       {walletTokens.find(t => t.token_address === customAddress)
-                        ? `${walletTokens.find(t => t.token_address === customAddress)!.symbol} — ${walletTokens.find(t => t.token_address === customAddress)!.name}`
+                        ? `${walletTokens.find(t => t.token_address === customAddress)!.symbol}`
                         : 'Select a token'}
                     </span>
                     <FiChevronDown className="text-gray-400 ml-10" />
