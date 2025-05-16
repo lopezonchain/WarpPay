@@ -162,7 +162,7 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
         <input
           type="text"
           placeholder="Recipient (wallet, ENS, Farcaster user)"
-          className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-base"
+          className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-center"
           value={to}
           onChange={(e) => setTo(e.target.value)}
         />
@@ -170,7 +170,7 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
         <input
           type="number"
           placeholder="Amount"
-          className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-base"
+          className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-center"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
         />

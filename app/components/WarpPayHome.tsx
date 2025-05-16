@@ -71,6 +71,14 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
         fee: 2,
       },
       /*{
+        icon: <FiGift />,
+        label: "Escrow",
+        desc: "Escrow any work, or earn",
+        action: "escrow",
+        enabled: true,
+        fee: 2,
+      },
+      {
         icon: <FiBookOpen />,
         label: "History",
         desc: "View your past payments",

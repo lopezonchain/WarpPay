@@ -293,8 +293,8 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
               type="text"
               value={recipient}
               onChange={e => setRecipient(e.target.value)}
-              className="w-full p-3 rounded-lg bg-[#1a1725] placeholder-gray-500"
-              placeholder="Wallet, ENS/Basename or Farcaster user"
+              className="w-full p-3 rounded-lg bg-[#1a1725] placeholder-gray-500 text-center"
+              placeholder="Farcaster user, ENS, wallet"
             />
           </div>
 
@@ -304,7 +304,7 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
               type="text"
               value={amount}
               onChange={e => setAmount(e.target.value)}
-              className="w-full p-3 rounded-lg bg-[#1a1725] placeholder-gray-500"
+              className="w-full p-3 rounded-lg bg-[#1a1725] placeholder-gray-500 text-center"
               placeholder="e.g. 0.5"
             />
           </div>
@@ -324,7 +324,7 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
               min={minDateTime}
               value={executeTime}
               onChange={e => setExecuteTime(e.target.value)}
-              className="w-full p-3 rounded-lg bg-[#1a1725]"
+              className="w-full p-3 rounded-lg bg-[#1a1725] text-center"
             />
           </div>
 
@@ -339,7 +339,7 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
                   min="1"
                   value={intervalValue}
                   onChange={e => setIntervalValue(e.target.value)}
-                  className="w-full p-3 rounded-lg bg-[#1a1725]"
+                  className="w-full p-3 rounded-lg bg-[#1a1725] text-center"
                   placeholder="Enter number"
                 />
                 <div className="flex space-x-2 mt-2">
@@ -362,7 +362,7 @@ export default function ScheduleScreen({ onBack }: { onBack: () => void }) {
                   min="1"
                   value={repetitions}
                   onChange={e => setRepetitions(e.target.value)}
-                  className="w-full p-3 rounded-lg bg-[#1a1725]"
+                  className="w-full p-3 rounded-lg bg-[#1a1725] text-center"
                 />
               </div>
             </>

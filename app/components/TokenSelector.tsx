@@ -91,7 +91,7 @@ export default function TokenSelector({
                   onCustomAddressChange('')
                 }
               }}
-              className={`flex-1 py-3 rounded-lg text-base font-medium
+              className={`flex-1 py-3 rounded-lg text-center font-medium
                 ${selected === opt ? 'bg-purple-600' : 'bg-[#1a1725]'}
                 hover:bg-purple-500 transition`}
             >
@@ -105,7 +105,7 @@ export default function TokenSelector({
         <input
           type="text"
           placeholder="Token Contract Address"
-          className="w-full p-4 mt-2 rounded-lg bg-[#1a1725] text-white text-base"
+          className="w-full p-4 mt-2 rounded-lg bg-[#1a1725] text-white text-center"
           value={customAddress}
           onChange={(e) => onCustomAddressChange(e.target.value)}
         />

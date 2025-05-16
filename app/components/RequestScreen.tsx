@@ -22,8 +22,7 @@ const RequestScreen: React.FC<RequestScreenProps> = ({ address, onBack }) => {
   const [modalMessage, setModalMessage] = useState<string | null>(null);
   const { data: walletClient } = useWalletClient();
 
-  // Pre-fill desde la URL (incluyendo reason)
-  useEffect(() => {
+  /*useEffect(() => {
     const a = searchParams.get("amount");
     const t = searchParams.get("token");
     const c = searchParams.get("contract");
@@ -36,7 +35,7 @@ const RequestScreen: React.FC<RequestScreenProps> = ({ address, onBack }) => {
       setSelectedToken("CUSTOM");
       if (c) setContractAddress(c);
     }
-  }, [searchParams]);
+  }, [searchParams]);  */
 
   const generateLink = () => {
     if (!address) {
@@ -83,7 +82,7 @@ const RequestScreen: React.FC<RequestScreenProps> = ({ address, onBack }) => {
         <input
           type="number"
           placeholder="Amount"
-          className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-base"
+          className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-center"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
         />
@@ -91,7 +90,7 @@ const RequestScreen: React.FC<RequestScreenProps> = ({ address, onBack }) => {
         <input
           type="text"
           placeholder="Reason (optional)"
-          className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-base"
+          className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-center"
           value={reason}
           maxLength={30}
           onChange={(e) => setReason(e.target.value)}
@@ -116,7 +115,7 @@ const RequestScreen: React.FC<RequestScreenProps> = ({ address, onBack }) => {
           <div className="mt-4 space-y-2">
             <input
               readOnly
-              className="w-full p-4 rounded-lg bg-[#252435] text-white text-base"
+              className="w-full p-4 rounded-lg bg-[#252435] text-white text-center"
               value={link}
             />
             <button
