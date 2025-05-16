@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { FiArrowLeft, FiCompass } from "react-icons/fi";
+import { FiArrowLeft, FiCompass, FiInfo } from "react-icons/fi";
 import AlertModal from "./AlertModal";
 import SuccessModal from "./SuccessModal";
 import { sendTokens } from "../services/contractService";
@@ -11,6 +11,7 @@ import { useSearchParams } from "next/navigation";
 import { parseUnits, parseEther } from "viem";
 import TokenSelector, { TokenOption } from "./TokenSelector";
 import { useAddFrame } from '@coinbase/onchainkit/minikit'
+import { motion } from "framer-motion";
 
 interface SendScreenProps {
   address?: `0x${string}`;
@@ -40,6 +41,7 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
   const [amount, setAmount] = useState("");
   const [selectedToken, setSelectedToken] = useState<TokenOption>("ETH");
   const [contractAddress, setContractAddress] = useState("");
+  const [reason, setReason] = useState<string | null>(null);
   const [modalMessage, setModalMessage] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -62,6 +64,7 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
     const a = searchParams.get("amount");
     const t = searchParams.get("token");
     const c = searchParams.get("contract");
+    const r = searchParams.get("reason"); 
     if (w) setTo(w);
     if (a) setAmount(a);
     if (t === "USDC") {
@@ -69,7 +72,8 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
     } else if (t && t !== "ETH") {
       setSelectedToken("CUSTOM");
       if (c) setContractAddress(c);
-    }
+    } 
+    if (r) setReason(r);  
   }, [searchParams]);
 
   const getTokenType = () => (selectedToken === "ETH" ? "ETH" : "ERC20");
@@ -135,6 +139,24 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
       </button>
 
       <h2 className="text-2xl font-bold mb-6 mx-auto">Send</h2>
+
+      {reason && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="
+            w-full max-w-md mb-4 p-3 flex items-center space-x-2
+            bg-indigo-700 bg-opacity-90 rounded-xl shadow-lg
+          "
+        >
+          <FiInfo className="w-6 h-6 text-white" />
+          <div>
+            <span className="block text-xs text-gray-200 uppercase">Reason</span>
+            <span className="block font-medium text-white">{reason}</span>
+          </div>
+        </motion.div>
+      )}
 
       <div className="space-y-4 flex-2 w-full">
         <input
