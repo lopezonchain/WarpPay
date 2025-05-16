@@ -500,7 +500,7 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
                 onChange={e => setAmountPerRecipient(e.target.value)}
               />)}
             <textarea
-              placeholder={useSameAmount ? "One recipient wallet, ENS or Farcaster user per line" : "recipient,amount per line"}
+              placeholder={useSameAmount ? "One recipient Farcaster user, ENS or wallet per line" : "recipient,amount per line"}
               className="w-full h-40 p-3 rounded-lg bg-[#1a1725] text-white"
               value={csvText}
               onChange={e => setCsvText(e.target.value)}

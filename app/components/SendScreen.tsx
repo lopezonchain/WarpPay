@@ -161,7 +161,7 @@ const SendScreen: React.FC<SendScreenProps> = ({ address, onBack }) => {
       <div className="space-y-4 flex-2 w-full">
         <input
           type="text"
-          placeholder="Recipient (wallet, ENS, Farcaster user)"
+          placeholder="Recipient (Farcaster user, ENS, wallet)"
           className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-center"
           value={to}
           onChange={(e) => setTo(e.target.value)}
