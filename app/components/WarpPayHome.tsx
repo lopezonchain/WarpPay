@@ -165,7 +165,7 @@ return (
                   {/* Icon + label */}
                   <div className="flex justify-center items-center w-full space-x-3">
                     <span className="text-lg">{icon}</span>
-                    <span className={`font-semibold ${isEarn ? 'text-xl' : ''}`}>
+                    <span className="font-semibold text-xl">
                       {label}
                     </span>
                   </div>
@@ -178,7 +178,7 @@ return (
                         setOpenDesc(isOpen ? null : action);
                       }}
                       className="absolute inset-y-0 right-0 w-12 flex items-center justify-center"
-                      aria-label="Mostrar descripción"
+                      aria-label="Show description"
                     >
                       <div className="p-3 bg-gray-700 rounded-full hover:bg-gray-600 transition-colors">
                         <FiInfo className="text-2xl" />
@@ -195,7 +195,7 @@ return (
                       ${isOpen ? 'max-h-40 mt-2' : 'max-h-0'}
                     `}
                   >
-                    <p className="text-xs text-gray-400 px-6 pb-2">{desc}</p>
+                    <p className="text-s text-gray-400 px-6 pb-2">{desc}</p>
                   </div>
                 )}
               </div>
