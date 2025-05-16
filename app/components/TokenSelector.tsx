@@ -1,28 +1,12 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import { FiChevronDown } from 'react-icons/fi'
 import { useAccount } from 'wagmi'
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import {
   base,
   mainnet,
-  arbitrum,
-  optimism,
-  polygon,
-  polygonZkEvm,
-  avalanche,
-  fantom,
-  gnosis,
-  celo,
-  bsc,
-  zksync,
-  scroll,
-  linea,
-  metis,
-  dogechain,
-  tron,
-  aurora,
-  moonbeam,
-  neonMainnet,
   monadTestnet,
 } from 'wagmi/chains'
 
@@ -38,9 +22,9 @@ interface TokenSelectorProps {
 
 // USDC contract per chain
 const USDC_ADDRESSES: Record<number, string> = {
-  [mainnet.id]: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-  [base.id]: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
-  [monadTestnet.id]: '0xf817257fed379853cde0fa4f97ab987181b1e5ea'
+  [mainnet.id]:    '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+  [base.id]:       '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+  [monadTestnet.id]:'0xf817257fed379853cde0fa4f97ab987181b1e5ea',
 }
 
 export default function TokenSelector({
@@ -52,63 +36,47 @@ export default function TokenSelector({
 }: TokenSelectorProps) {
   const { address: walletAddress } = useAccount()
 
-  // State for wallet-derived tokens & loading
   const [walletTokens, setWalletTokens] = useState<
-    Array<{ symbol: string; token_address: string }>
+    Array<{ symbol: string; name: string; token_address: string }>
   >([])
   const [loadingTokens, setLoadingTokens] = useState(false)
-  // Toggle between “wallet tokens” vs. “manual address”
   const [useWalletTokens, setUseWalletTokens] = useState(true)
 
-  // ETH label might change per chain (e.g. MON)
   const ethLabel = chainId === monadTestnet.id ? 'MON' : 'ETH'
   const hasUsdc = Boolean(USDC_ADDRESSES[chainId])
   const usdcAddress = USDC_ADDRESSES[chainId] ?? USDC_ADDRESSES[mainnet.id]!
 
-  // Auto-fill USDC address when user picks USDC
+  // Auto‐fill USDC address
   useEffect(() => {
     if (selected === 'USDC' && hasUsdc) {
       onCustomAddressChange(usdcAddress)
     }
   }, [selected, chainId])
 
-  // Whenever Custom is selected *and* we're in wallet-tokens mode:
-  // fetch your wallet's tokens once, with robust JSON handling
+  // Fetch wallet tokens when CUSTOM + useWalletTokens
   useEffect(() => {
     if (selected !== 'CUSTOM' || !useWalletTokens || !walletAddress) return
 
     const loadTokens = async () => {
       setLoadingTokens(true)
       try {
-        // convierte el chainId decimal a hex string (e.g. 8453 → "0x2105")
         const chainHex = `0x${chainId.toString(16)}`
-
         const res = await fetch(
           `/api/token-balances?wallet=${walletAddress}&chainId=${chainHex}`
         )
-        if (!res.ok) {
-          console.error(`Error fetching tokens: ${res.status} ${res.statusText}`)
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
+        const raw = await res.json()
+        if (Array.isArray(raw)) {
+          setWalletTokens(
+            raw.map((t: any) => ({
+              symbol: t.symbol,
+              name: t.name,
+              token_address: t.token_address,
+            }))
+          )
+        } else {
           setWalletTokens([])
-          return
         }
-
-        const text = await res.text()
-        let raw: any[] = []
-        if (text) {
-          try {
-            raw = JSON.parse(text)
-          } catch (e) {
-            console.error('Failed to parse token-balances JSON:', e)
-          }
-        }
-
-        const tokens = Array.isArray(raw)
-          ? raw.map(t => ({
-            symbol: t.symbol,
-            token_address: t.token_address,
-          }))
-          : []
-        setWalletTokens(tokens)
       } catch (err) {
         console.error('Fetch token-balances failed:', err)
         setWalletTokens([])
@@ -120,14 +88,13 @@ export default function TokenSelector({
     loadTokens()
   }, [selected, useWalletTokens, walletAddress, chainId])
 
-  // Build the three main buttons exactly as before
   const options: TokenOption[] = hasUsdc
     ? ['ETH', 'USDC', 'CUSTOM']
     : ['ETH', 'CUSTOM']
 
   return (
     <>
-      {/* === Original option buttons === */}
+      {/* ETH / USDC / Other buttons */}
       <div className="flex space-x-2">
         {options.map(opt => {
           const label = opt === 'ETH'
@@ -141,7 +108,6 @@ export default function TokenSelector({
               key={opt}
               onClick={() => {
                 onSelect(opt)
-                // clear manual address when switching away
                 if (opt !== 'CUSTOM') onCustomAddressChange('')
                 setUseWalletTokens(true)
               }}
@@ -157,35 +123,68 @@ export default function TokenSelector({
         })}
       </div>
 
-      {/* === Custom sub-UI === */}
+      {/* Custom token UI */}
       {selected === 'CUSTOM' && (
-        <div className="mt-2 space-y-2">
+        <div className="mt-4 space-y-2">
           {useWalletTokens ? (
             loadingTokens ? (
               <div className="p-4 bg-[#1a1725] rounded-lg text-center text-gray-400">
                 Loading tokens…
               </div>
             ) : (
-              <select
-                className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-base"
-                value={customAddress}
-                onChange={e => {
-                  onCustomAddressChange(e.target.value)
-                }}
-              >
-                <option value="">Select a token</option>
-                {walletTokens.map(t => (
-                  <option key={t.token_address} value={t.token_address}>
-                    {t.symbol}
-                  </option>
-                ))}
-              </select>
+              <div className="relative w-full max-w-md mx-auto">
+                <Listbox
+                  value={customAddress}
+                  onChange={onCustomAddressChange}
+                >
+                  <ListboxButton className="
+                    w-full flex items-center justify-center
+                    bg-[#1a1725] text-white text-lg
+                    py-4 px-6 rounded-lg appearance-none
+                    focus:outline-none focus:ring-2 focus:ring-indigo-500
+                    transition
+                  ">
+                    <span className="truncate">
+                      {walletTokens.find(t => t.token_address === customAddress)
+                        ? `${walletTokens.find(t => t.token_address === customAddress)!.symbol} — ${walletTokens.find(t => t.token_address === customAddress)!.name}`
+                        : 'Select a token'}
+                    </span>
+                    <FiChevronDown className="text-gray-400 ml-10" />
+                  </ListboxButton>
+
+                  <ListboxOptions className="
+                    absolute z-10 mt-1 w-full max-h-64
+                    overflow-auto rounded-lg bg-[#1a1725]
+                    py-1
+                  ">
+                    {walletTokens.map(t => (
+                      <ListboxOption
+                        key={t.token_address}
+                        value={t.token_address}
+                        className={({ active, selected }) =>
+                          `cursor-pointer select-none transition
+                           ${active ? 'bg-indigo-600' : 'bg-[#1a1725]'}`
+                        }
+                      >
+                        <div className="px-6 py-4 flex flex-col">
+                          <span className="text-lg text-white">
+                            {t.symbol}
+                          </span>
+                          <span className="text-sm text-gray-400">
+                            {t.name}
+                          </span>
+                        </div>
+                      </ListboxOption>
+                    ))}
+                  </ListboxOptions>
+                </Listbox>
+              </div>
             )
           ) : (
             <input
               type="text"
               placeholder="Token Contract Address"
-              className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-center"
+              className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-center text-lg"
               value={customAddress}
               onChange={e => onCustomAddressChange(e.target.value)}
             />
