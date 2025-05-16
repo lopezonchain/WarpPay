@@ -93,6 +93,7 @@ const RequestScreen: React.FC<RequestScreenProps> = ({ address, onBack }) => {
           placeholder="Reason (optional)"
           className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-base"
           value={reason}
+          maxLength={30}
           onChange={(e) => setReason(e.target.value)}
         />
 

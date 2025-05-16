@@ -16,9 +16,11 @@ export async function generateMetadata({ searchParams }: { searchParams: { [key:
   const formattedAmount = amount ? `${amount} ${token}` : "";
   const shortWallet     = wallet ? `${wallet.slice(0, 6)}...${wallet.slice(-4)}` : "";
 
+  const title = reasonText !== "" ? reasonText : `WarpPay me ${formattedAmount} 💸 ${reasonText}`
+
   return {
     title: isPayment
-      ? `WarpPay me ${formattedAmount} 💸 ${reasonText} `
+      ? title
       : "WarpPay",
     description: isPayment
       ? `Send ${formattedAmount}${reasonText} to ${shortWallet}`
@@ -31,7 +33,7 @@ export async function generateMetadata({ searchParams }: { searchParams: { [key:
           : "https://warppay.lopezonchain.xyz/WarpPayLogo.png",
         button: {
           title: isPayment
-            ? `WarpPay me ${formattedAmount} 💸 ${reasonText}`
+            ? title
             : "Launch WarpPay 💸",
           action: {
             type: "launch_frame",
