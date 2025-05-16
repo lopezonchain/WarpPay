@@ -1,4 +1,3 @@
-// src/components/RequestScreen.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -16,22 +15,21 @@ interface RequestScreenProps {
 const RequestScreen: React.FC<RequestScreenProps> = ({ address, onBack }) => {
   const searchParams = useSearchParams();
   const [amount, setAmount] = useState("");
+  const [reason, setReason] = useState("");
   const [selectedToken, setSelectedToken] = useState<TokenOption>("ETH");
   const [contractAddress, setContractAddress] = useState("");
   const [link, setLink] = useState("");
   const [modalMessage, setModalMessage] = useState<string | null>(null);
   const { data: walletClient } = useWalletClient();
 
-  // Pre-fill from URL, similar to SendScreen
+  // Pre-fill desde la URL (incluyendo reason)
   useEffect(() => {
-    const w = searchParams.get("wallet");
     const a = searchParams.get("amount");
     const t = searchParams.get("token");
     const c = searchParams.get("contract");
-    if (w) {
-      // nothing to autofill in request besides amount
-    }
+    const r = searchParams.get("reason");
     if (a) setAmount(a);
+    if (r) setReason(r);
     if (t === "USDC") {
       setSelectedToken("USDC");
     } else if (t && t !== "ETH") {
@@ -52,6 +50,9 @@ const RequestScreen: React.FC<RequestScreenProps> = ({ address, onBack }) => {
     const params = new URLSearchParams();
     params.set("wallet", address);
     params.set("amount", amount);
+    if (reason) {
+      params.set("reason", reason);
+    }
     if (selectedToken !== "ETH") {
       params.set("token", selectedToken);
       params.set("contract", contractAddress);
@@ -79,15 +80,21 @@ const RequestScreen: React.FC<RequestScreenProps> = ({ address, onBack }) => {
       <h2 className="text-2xl font-bold mb-6 mx-auto">Request</h2>
 
       <div className="space-y-4 flex-2 w-full">
-        <div className="relative">
-          <input
-            type="number"
-            placeholder="Amount"
-            className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-base"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-        </div>
+        <input
+          type="number"
+          placeholder="Amount"
+          className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-base"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+        />
+
+        <input
+          type="text"
+          placeholder="Reason (optional)"
+          className="w-full p-4 rounded-lg bg-[#1a1725] text-white text-base"
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+        />
 
         <TokenSelector
           selected={selectedToken}
