@@ -418,7 +418,6 @@ export default function Page(): JSX.Element {
           {warpView === "airdrop" && <AirdropScreen address={address} onBack={handleBack} />}
           {warpView === "schedule" && <ScheduleScreen onBack={handleBack} />}
           {warpView === "earn" && <EarnScreen onBack={handleBack} />}
-          
         </main>
       </div>
     </div>
