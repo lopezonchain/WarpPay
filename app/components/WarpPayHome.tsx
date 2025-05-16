@@ -49,15 +49,15 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
       {
         icon: <FiDollarSign />,
         label: "Request",
-        desc: "Generate feed integrated request links that anyone can fulfill, anywhere, with just couple clicks!!",
+        desc: "Generate feed integrated request links that anyone can fulfill, anywhere, with just couple clicks!! Customize your link embed and preview with a reason",
         action: "request",
         enabled: true,
         fee: 0,
       },
       {
         icon: <FiClock />,
-        label: "Scheduler",
-        desc: "Schedule one-time or recurring payments with our usual Farcaster names and ENS / Basenames support",
+        label: "Schedule",
+        desc: "Schedule one-time or recurring payments with our usual Farcaster names and ENS / Basenames support, as long as wallet addresses",
         action: "schedule",
         enabled: true,
         fee: 3,
@@ -163,7 +163,7 @@ return (
                   ) : null}
 
                   {/* Icon + label */}
-                  <div className="flex justify-center items-center w-full space-x-3">
+                  <div className="flex justify-center items-center w-full space-x-2">
                     <span className="text-lg">{icon}</span>
                     <span className="font-semibold text-xl">
                       {label}
