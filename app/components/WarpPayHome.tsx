@@ -32,10 +32,10 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
   }[] = [
       {
         icon: <FiTrendingUp />,
-        label: "Earn (soon)",
-        desc: "Excute payments before the automatic execution, get 1%",
+        label: "Earn",
+        desc: "Excute payments, get 1%",
         action: "earn",
-        enabled: false,
+        enabled: true,
         fee: 0,
       },
       {

@@ -159,8 +159,8 @@ export default function EarnScreen({ onBack }: { onBack: () => void }) {
                 <ol className="list-decimal list-inside space-y-1 text-sm text-gray-200">
                     <li>Add WarpPay to your miniapps in the upper right corner button, with notifications!!</li>
                     <li>
-                        When you receive a notification about a payment, open the app and be the first executing it within
-                        <span className="font-bold text-white"> 15 minutes </span>before it’s auto-executed.
+                        When you receive a notification about a payment (notifications are not implemented yet), open the app and be the first executing it within
+                        <span className="font-bold text-white"> the timeline </span>.
                     </li>
                     <li>Enjoy your <span className="text-green-400 font-bold">1% reward</span>!</li>
                 </ol>
