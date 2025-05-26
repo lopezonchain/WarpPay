@@ -207,45 +207,9 @@ export default function EarnScreen({ onBack }: { onBack: () => void }) {
             </div>
 
             {/* Pago pendiente (o mensaje de no hay) */}
-            {due ? (
-                <div className="w-full max-w-md bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl shadow-lg flex flex-col">
-                    <div className="flex justify-between items-center mb-4">
-                        <span className="text-lg font-medium">Next Payout</span>
-                        <span className="text-xs uppercase px-2 py-1 bg-yellow-500 rounded-full font-semibold">
-                            Pending
-                        </span>
-                    </div>
-                    <dl className="space-y-4 flex-1">
-                        <div>
-                            <dt className="text-gray-400 text-sm">Date</dt>
-                            <dd className="text-white font-medium">{dateStr}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-gray-400 text-sm">Amount</dt>
-                            <dd className="text-white font-medium">{amountEth} ETH</dd>
-                        </div>
-                        <div>
-                            <dt className="text-gray-400 text-sm">Your Reward (1%)</dt>
-                            <dd className="text-green-400 font-bold text-xl">+{rewardEth} ETH</dd>
-                        </div>
-                        <div>
-                            <dt className="text-gray-400 text-sm">Overdue by</dt>
-                            <dd className="text-red-500 font-medium">
-                                {Math.floor(overdueTime / 3600)}h {Math.floor((overdueTime % 3600) / 60)}m
-                            </dd>
-                        </div>
-                    </dl>
-                    <button
-                        onClick={handleExecute}
-                        disabled={loading}
-                        className="mt-6 py-3 bg-green-600 hover:bg-green-700 rounded-xl font-bold text-lg transition disabled:opacity-50"
-                    >
-                        {loading ? 'Executing…' : 'Execute Payment'}
-                    </button>
-                </div>
-            ) : (
+            
                 <p className="text-center text-gray-500 mt-20">No pending payouts</p>
-            )}
+            
 
             {modalMessage && (
                 <AlertModal message={modalMessage} onClose={() => setModalMessage(null)} />
