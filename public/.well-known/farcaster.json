@@ -15,7 +15,7 @@
       "homeUrl": "https://warppay.lopezonchain.xyz",
       "webhookUrl": "https://warppay.lopezonchain.xyz/api/webhook",
       "subtitle": "All-in-one easy payments",
-      "description": "WarpPay is a fast and intuitive payment miniapp that helps users send and receive any coin in any way. Designed for smooth in-wallet experiences.",
+      "description": "Send. Request. Airdrop. Schedule",
       "screenshotUrls": [
         "https://warppay.lopezonchain.xyz/screen_1.png",
         "https://warppay.lopezonchain.xyz/screen_2.png",
@@ -30,7 +30,7 @@
         "tips"
       ],
       "heroImageUrl": "https://warppay.lopezonchain.xyz/hero.png",
-      "tagline": "Send. Receive. WarpPay.",
+      "tagline": "Send. Request. Airdrop. Schedule",
       "ogTitle": "WarpPay – All-in-one payments",
       "ogDescription": "Simple but useful payments utility, from your Farcaster or Coinbase feeds or desktop browser.",
       "ogImageUrl": "https://warppay.lopezonchain.xyz/hero.png"

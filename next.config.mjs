@@ -12,11 +12,11 @@ const nextConfig = {
     return [
       {
         source: "/api/warpcast/v2/:path*",
-        destination: "https://api.warpcast.com/v2/:path*",
+        destination: "https://api.farcaster.xyz/v2/:path*",
       },
       {
         source: "/api/warpcast/fc/:path*",
-        destination: "https://api.warpcast.com/fc/:path*",
+        destination: "https://api.farcaster.xyz/fc/:path*",
       },
     ];
   },

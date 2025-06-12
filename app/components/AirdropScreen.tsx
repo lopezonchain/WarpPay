@@ -65,8 +65,8 @@ const AirdropScreen: React.FC<AirdropScreenProps> = ({ address, onBack }) => {
 
   // Handler para compartir en Warpcast vía URL
   const handleShare = useCallback(() => {
-    const text = `I've just sent an airdrop with WarpPay!! The all-in-one payments miniapp by @lopezonchain.eth 🚀 Send anything, anywhere to anyone just with a farcaster name, create request links, scheduled transfers, or even EARN! https://warpcast.com/miniapps/V0727cQCBnfX/warppay- `;
-    const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
+    const text = `I've just sent an airdrop with WarpPay!! The all-in-one payments miniapp by @lopezonchain.eth 🚀 Send anything, anywhere to anyone just with a farcaster name, create request links, scheduled transfers, or even EARN! https://farcaster.xyz/miniapps/V0727cQCBnfX/warppay- `;
+    const url = `https://farcaster.xyz/~/compose?text=${encodeURIComponent(text)}`;
     window.open(url, "_blank");
   }, []);
 

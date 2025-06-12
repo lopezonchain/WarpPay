@@ -23,7 +23,7 @@ const RequestScreen: React.FC<RequestScreenProps> = ({ address, onBack }) => {
   const { data: walletClient } = useWalletClient();
 
   const handleShare = () => {
-      const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(link)}`;
+      const url = `https://farcaster.xyz/~/compose?text=${encodeURIComponent(link)}`;
       window.open(url, "_blank");
     }
 

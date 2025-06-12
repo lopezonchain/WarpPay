@@ -89,8 +89,8 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
     ];
 
     const handleShare = useCallback(() => {
-      const text = `Do you know WarpPay?? The all-in-one payments miniapp by @lopezonchain.eth 🚀 Send anything, anywhere to anyone just with a farcaster name or ENS, create request links, airdrops, scheduled transfers, or even EARN! https://warpcast.com/miniapps/V0727cQCBnfX/warppay- `;
-      const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
+      const text = `Do you know WarpPay?? The all-in-one payments miniapp by @lopezonchain.eth 🚀 Send anything, anywhere to anyone just with a farcaster name or ENS, create request links, airdrops, scheduled transfers, or even EARN! https://farcaster.xyz/miniapps/V0727cQCBnfX/warppay- `;
+      const url = `https://farcaster.xyz/~/compose?text=${encodeURIComponent(text)}`;
       window.open(url, "_blank");
     }, []);
 
