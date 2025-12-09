@@ -88,13 +88,13 @@ const WarpPayHome: React.FC<WarpPayHomeProps> = ({ onAction }) => {
       },*/
     ];
 
-    const handleShare = useCallback(() => {
-      const text = `Do you know WarpPay?? The all-in-one payments miniapp by @lopezonchain.eth 🚀 Send anything, anywhere to anyone just with a farcaster name or ENS, create request links, airdrops, scheduled transfers, or even EARN! https://farcaster.xyz/miniapps/V0727cQCBnfX/warppay- `;
-      const url = `https://farcaster.xyz/~/compose?text=${encodeURIComponent(text)}`;
-      window.open(url, "_blank");
-    }, []);
+  const handleShare = useCallback(() => {
+    const text = `Do you know WarpPay?? The all-in-one payments miniapp by @lopezonchain.eth 🚀 Send anything, anywhere to anyone just with a farcaster name or ENS, create request links, airdrops, scheduled transfers, or even EARN! https://farcaster.xyz/miniapps/V0727cQCBnfX/warppay- `;
+    const url = `https://farcaster.xyz/~/compose?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank");
+  }, []);
 
-return (
+  return (
     <div className="bg-[#0f0d14] text-white px-4 py-3 flex flex-col items-center w-full">
       {/* Header */}
       <div className="flex items-end mb-4">
@@ -133,19 +133,18 @@ return (
                       : 'bg-[#1a1725] opacity-50 cursor-not-allowed'}
                     transition-shadow duration-200
                     ${isEarn
-                    ? "bg-yellow-500 hover:bg-yellow-400 text-black font-extrabold transform hover:scale-105"
-                    : enabled
-                      ? "bg-[#1a1725] hover:bg-[#2a2438] border border-[#2a2438] text-white"
-                      : "bg-[#1a1725] border border-[#3a3448] text-gray-500"
-                  }
+                      ? "bg-yellow-500 hover:bg-yellow-400 text-black font-extrabold transform hover:scale-105"
+                      : enabled
+                        ? "bg-[#1a1725] hover:bg-[#2a2438] border border-[#2a2438] text-white"
+                        : "bg-[#1a1725] border border-[#3a3448] text-gray-500"
+                    }
                   `}
                 >
                   {/* Fee badge en la izquierda */}
                   {!isEarn && action !== 'history' && (
                     <span
-                      className={`absolute left-4 text-xs font-semibold px-2 py-0.5 rounded-full ${
-                        fee === 0 ? 'bg-green-600' : 'bg-green-800'
-                      }`}
+                      className={`absolute left-4 text-xs font-semibold px-2 py-0.5 rounded-full ${fee === 0 ? 'bg-green-600' : 'bg-green-800'
+                        }`}
                     >
                       {fee === 0 ? 'FREE' : `${fee}% fee`}
                     </span>
@@ -154,7 +153,7 @@ return (
                   {(action === "airdrop" || action === "schedule" || action === "earn") ? (
                     <div>
                       <img
-                        src="https://github.com/base/brand-kit/blob/main/logo/symbol/Base_Symbol_Blue.png?raw=true"
+                        src="/Base.png"
                         alt="Base logo"
                         className="absolute bottom-1 right-16 w-4 h-4 opacity-80"
                       />
