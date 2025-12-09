@@ -39,7 +39,7 @@ import {
 import ScheduleScreen from "./components/ScheduleScreen";
 import EarnScreen from "./components/EarnScreen";
 
-export type WarpView = "home" | "send" | "request" | "airdrop" | "schedule" | "history"  | "earn" ;
+export type WarpView = "home" | "send" | "request" | "airdrop" | "schedule" | "history" | "earn";
 
 const chainOptions = [
   //{ label: "Sepolia", chain: baseSepolia },
@@ -326,7 +326,7 @@ export default function Page(): JSX.Element {
                     <div className="flex items-center space-x-2">
                       {selectedChain.id === 8453 && (
                         <img
-                          src="https://github.com/base/brand-kit/blob/main/logo/symbol/Base_Symbol_Blue.png?raw=true"
+                          src="/Base.png"
                           alt="Base logo"
                           className="w-5 h-5"
                         />
@@ -366,7 +366,7 @@ export default function Page(): JSX.Element {
                               <div className="flex items-center space-x-2">
                                 {o.chain.id === 8453 && (
                                   <img
-                                    src="https://github.com/base/brand-kit/blob/main/logo/symbol/Base_Symbol_Blue.png?raw=true"
+                                    src="/Base.png"
                                     alt="Base logo"
                                     className="w-4 h-4"
                                   />
@@ -408,7 +408,7 @@ export default function Page(): JSX.Element {
 
             <div>{saveFrameButton}</div>
           </div>
-          
+
         </header>
 
         <main className="flex-1">
